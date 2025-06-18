@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,18 +14,18 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
-class RegisteredUserController extends Controller
+class OrganizerRegisterController extends Controller
 {
     /**
-     * Display the registration view.
+     * Display the organizer registration view.
      */
     public function create(): View
     {
-        return view('auth.register');
+        return view('auth.register-organizer');
     }
 
     /**
-     * Handle an incoming registration request.
+     * Handle an incoming organizer registration request.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -36,13 +37,13 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $userRole = Role::where('slug', 'user')->first();
+        $organizerRole = Role::where('slug', 'organizer')->first();
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $userRole->id,
+            'role_id' => $organizerRole->id,
         ]);
 
         event(new Registered($user));
