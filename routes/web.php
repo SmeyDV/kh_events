@@ -38,7 +38,7 @@ Route::get('/events/{event}', [EventController::class, 'show'])->name('events.sh
 // Routes that require a user to be logged in and verified.
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // General authenticated user routes
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
@@ -49,8 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Organizer-only routes
     Route::middleware(['role:organizer'])->group(function () {
         Route::get('/organizer', [DashboardController::class, 'organizer'])->name('organizer.dashboard');
-        Route::get('/my-events', [EventController::class, 'myEvents'])->name('events.my');
-        
+        Route::get('/my-events', [EventController::class, 'myEvents'])->name('events.my-events');
+
         // Resource controller for event CRUD actions (create, store, edit, update, destroy)
         Route::resource('events', EventController::class)->except(['index', 'show']);
     });
@@ -65,7 +65,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin,organizer'])->group(function () {
         Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
     });
-
 });
 
 require __DIR__ . '/auth.php';
