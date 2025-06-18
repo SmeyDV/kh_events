@@ -15,6 +15,25 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
+                        {{ __('Events') }}
+                    </x-nav-link>
+
+                    @if (Auth::user()->isOrganizer())
+                    <x-nav-link :href="route('events.my-events')" :active="request()->routeIs('events.my-events')">
+                        {{ __('My Events') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('events.create')" :active="request()->routeIs('events.create')">
+                        {{ __('Create Event') }}
+                    </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->isAdmin())
+                    <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                        {{ __('Admin') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -43,7 +62,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -70,6 +89,25 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
+                {{ __('Events') }}
+            </x-responsive-nav-link>
+
+            @if (Auth::user()->isOrganizer())
+            <x-responsive-nav-link :href="route('events.my-events')" :active="request()->routeIs('events.my-events')">
+                {{ __('My Events') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('events.create')" :active="request()->routeIs('events.create')">
+                {{ __('Create Event') }}
+            </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->isAdmin())
+            <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                {{ __('Admin') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -89,7 +127,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

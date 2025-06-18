@@ -9,6 +9,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Public event routes
+Route::get('/events', [EventController::class, 'index'])->name('events.index');
+Route::middleware(['auth', 'role:organizer'])->group(function () {
+    Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
+    Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
+    Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+});
+Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+
 // Routes for authenticated users
 Route::middleware(['auth', 'verified'])->group(function () {
     // General user dashboard
@@ -30,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Organizer only routes
     Route::middleware(['role:organizer'])->group(function () {
         Route::get('/organizer', [DashboardController::class, 'organizer'])->name('admin.organizer');
-        Route::resource('events', EventController::class);
+        Route::get('/my-events', [EventController::class, 'myEvents'])->name('events.my-events');
     });
 
     // Routes accessible by both admin and organizer

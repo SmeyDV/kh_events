@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -48,7 +49,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the user's role.
+     * Get the role that owns the User
      */
     public function role(): BelongsTo
     {
@@ -56,11 +57,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user has a specific role.
+     * Get the events for the user.
      */
-    public function hasRole(string $role): bool
+    public function events(): HasMany
     {
-        return $this->role->slug === $role;
+        return $this->hasMany(Event::class);
+    }
+
+    /**
+     * Check if the user has the given role.
+     */
+    public function hasRole(string $roleSlug): bool
+    {
+        return $this->role && $this->role->slug === $roleSlug;
     }
 
     /**
