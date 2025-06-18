@@ -20,9 +20,11 @@
                         {{ __('Events') }}
                     </x-nav-link>
 
+                    @if (Auth::user()->hasRole('user'))
                     <x-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.*')">
                         {{ __('My Bookings') }}
                     </x-nav-link>
+                    @endif
 
                     @if (Auth::user()->isOrganizer())
                     <x-nav-link :href="route('events.my-events')" :active="request()->routeIs('events.my-events')">
@@ -101,9 +103,11 @@
                 {{ __('Events') }}
             </x-responsive-nav-link>
 
+            @if (Auth::user()->hasRole('user'))
             <x-responsive-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.*')">
                 {{ __('My Bookings') }}
             </x-responsive-nav-link>
+            @endif
 
             @if (Auth::user()->isOrganizer())
             <x-responsive-nav-link :href="route('events.my-events')" :active="request()->routeIs('events.my-events')">

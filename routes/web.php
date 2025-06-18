@@ -69,6 +69,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
         Route::get('/users', [DashboardController::class, 'users'])->name('admin.users');
+        Route::get('/admin/events', [\App\Http\Controllers\AdminEventController::class, 'index'])->name('admin.events');
+        Route::post('/admin/events/{id}/approve', [\App\Http\Controllers\AdminEventController::class, 'approve'])->name('admin.events.approve');
+        Route::post('/admin/events/{id}/reject', [\App\Http\Controllers\AdminEventController::class, 'reject'])->name('admin.events.reject');
     });
 
     // Routes accessible by both admin and organizer

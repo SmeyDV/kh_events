@@ -10,8 +10,14 @@ class DashboardController extends Controller
 {
     public function admin(): View
     {
-        $users = User::with('role')->get();
-        return view('admin.dashboard', compact('users'));
+        $userCount = User::count();
+        $eventCount = \App\Models\Event::count();
+        $organizerCount = User::whereHas('role', function ($q) {
+            $q->where('slug', 'organizer');
+        })->count();
+        $pendingEventCount = \App\Models\Event::where('status', 'draft')->count();
+
+        return view('admin.dashboard', compact('userCount', 'eventCount', 'organizerCount', 'pendingEventCount'));
     }
 
     public function users(): View
