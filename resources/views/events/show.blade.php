@@ -66,14 +66,72 @@
                     </p>
                   </div>
                   <div>
-                    <p class="text-gray-500 dark:text-gray-400">Capacity</p>
-                    <p class="font-medium">{{ $event->capacity ?? 'Unlimited' }}</p>
+                    <p class="text-gray-500 dark:text-gray-400">Available Tickets</p>
+                    <p class="font-medium">
+                      @if ($event->capacity)
+                      @if ($event->isSoldOut())
+                      <span class="text-red-600 dark:text-red-400 font-semibold">Sold Out</span>
+                      @else
+                      {{ $event->remaining_tickets }} of {{ $event->capacity }} remaining
+                      @endif
+                      @else
+                      Unlimited
+                      @endif
+                    </p>
                   </div>
                   <div>
                     <p class="text-gray-500 dark:text-gray-400">Organizer</p>
-                    <p class="font-medium">{{ $event->organizer->name }}</p>
+                    <p class="font-medium">
+                      <a href="{{ route('users.show', $event->organizer) }}" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:underline">
+                        {{ $event->organizer->name }}
+                      </a>
+                    </p>
                   </div>
                 </div>
+
+                <!-- Booking Button -->
+                @auth
+                @if ($event->isAvailableForBooking())
+                @php
+                $existingBooking = auth()->user()->bookings()->where('event_id', $event->id)->first();
+                @endphp
+
+                @if ($existingBooking)
+                <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p class="text-blue-800 dark:text-blue-200 text-sm">
+                    You have already booked this event.
+                    <a href="{{ route('bookings.show', $existingBooking) }}" class="font-medium underline">View your booking</a>
+                  </p>
+                </div>
+                @else
+                <div class="mt-6">
+                  <a href="{{ route('bookings.create', $event) }}" class="w-full inline-flex justify-center items-center px-6 py-3 bg-red-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    Book Tickets
+                  </a>
+                </div>
+                @endif
+                @else
+                <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">
+                    @if ($event->isSoldOut())
+                    This event is sold out.
+                    @elseif ($event->isCancelled())
+                    This event has been cancelled.
+                    @elseif (!$event->isPublished())
+                    This event is not yet published.
+                    @else
+                    This event has already passed.
+                    @endif
+                  </p>
+                </div>
+                @endif
+                @else
+                <div class="mt-6">
+                  <a href="{{ route('login') }}" class="w-full inline-flex justify-center items-center px-6 py-3 bg-red-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    Login to Book Tickets
+                  </a>
+                </div>
+                @endauth
               </div>
             </div>
           </div>

@@ -61,7 +61,15 @@ class User extends Authenticatable
      */
     public function events(): HasMany
     {
-        return $this->hasMany(Event::class);
+        return $this->hasMany(Event::class, 'user_id');
+    }
+
+    /**
+     * Get the bookings for the user.
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 
     /**
@@ -86,5 +94,21 @@ class User extends Authenticatable
     public function isOrganizer(): bool
     {
         return $this->hasRole('organizer');
+    }
+
+    /**
+     * Get the user's profile URL.
+     */
+    public function getProfileUrlAttribute(): string
+    {
+        return route('users.show', $this);
+    }
+
+    /**
+     * Get the user's display name for URLs.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return strtolower(str_replace(' ', '-', $this->name));
     }
 }

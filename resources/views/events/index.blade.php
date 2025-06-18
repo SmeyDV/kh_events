@@ -37,6 +37,11 @@
               <span>{{ $event->start_date->format('M d, Y') }}</span>
               <span>{{ $event->venue }}</span>
             </div>
+            <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              By <a href="{{ route('users.show', $event->organizer) }}" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:underline">
+                {{ $event->organizer->name }}
+              </a>
+            </div>
             @if ($event->ticket_price)
             <div class="mt-2 text-green-600 font-semibold">
               ${{ number_format($event->ticket_price, 2) }}
