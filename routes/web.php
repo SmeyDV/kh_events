@@ -3,49 +3,36 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AdminEventController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 // --- PUBLIC ROUTES ---
-// Accessible by everyone, including guests.
-
 Route::get('/', function () {
-    $upcomingEvents = Event::where('start_date', '>', now())
+    $upcomingEvents = Event::where('status', 'published')
+        ->where('start_date', '>', now())
         ->orderBy('start_date', 'asc')
         ->take(3)
         ->get();
-
     return view('welcome', ['upcomingEvents' => $upcomingEvents]);
-});
+})->name('home');
 
-// Public list of all events
+// Public event listing and detail pages
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
+Route::get('/events/{event}', [EventController::class, 'show'])->where('event', '[0-9]+')->name('events.show');
+
 
 // --- AUTHENTICATED ROUTES ---
-// Routes that require a user to be logged in and verified.
-
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // User profile routes
-    Route::get('/profile', [UserProfileController::class, 'myProfile'])->name('profile');
+    // Default dashboard for standard users
     Route::get('/dashboard', function () {
-        return redirect()->route('profile');
+        return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    // User profile routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
@@ -56,22 +43,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::delete('/bookings/{booking}', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
-    // Organizer-only routes
-    Route::middleware(['role:organizer'])->group(function () {
-        Route::get('/organizer', [DashboardController::class, 'organizer'])->name('organizer.dashboard');
-        Route::get('/my-events', [EventController::class, 'myEvents'])->name('events.my-events');
+    // --- ORGANIZER ROUTES ---
+    Route::prefix('organizer')->name('organizer.')->middleware(['role:organizer'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'organizer'])->name('dashboard');
+        Route::get('/myevents', [EventController::class, 'myEvents'])->name('my-events');
 
-        // Resource controller for event CRUD actions (create, store, edit, update, destroy)
-        Route::resource('events', EventController::class)->except(['index', 'show']);
+        // Simplified Event Management Routes
+        Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+        Route::post('/events', [EventController::class, 'store'])->name('events.store');
+        Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
+        Route::patch('/events/{event}', [EventController::class, 'update'])->name('events.update');
+        Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     });
 
-    // Admin-only routes
-    Route::middleware(['role:admin'])->group(function () {
-        Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
-        Route::get('/users', [DashboardController::class, 'users'])->name('admin.users');
-        Route::get('/admin/events', [\App\Http\Controllers\AdminEventController::class, 'index'])->name('admin.events');
-        Route::post('/admin/events/{id}/approve', [\App\Http\Controllers\AdminEventController::class, 'approve'])->name('admin.events.approve');
-        Route::post('/admin/events/{id}/reject', [\App\Http\Controllers\AdminEventController::class, 'reject'])->name('admin.events.reject');
+    // --- ADMIN ROUTES ---
+    Route::prefix('admin')->name('admin.')->middleware(['role:admin'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+        Route::get('/users', [DashboardController::class, 'users'])->name('users');
+        Route::get('/events', [AdminEventController::class, 'index'])->name('events');
+        Route::post('/events/{id}/approve', [AdminEventController::class, 'approve'])->name('events.approve');
+        Route::post('/events/{id}/reject', [AdminEventController::class, 'reject'])->name('events.reject');
     });
 
     // Routes accessible by both admin and organizer
@@ -80,10 +71,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-// Public user profile pages
-Route::get('/users/{user}', [UserProfileController::class, 'show'])->name('users.show');
-
-// Single event view (with constraint to avoid conflict with /events/create)
-Route::get('/events/{event}', [EventController::class, 'show'])->where('event', '[0-9]+')->name('events.show');
 
 require __DIR__ . '/auth.php';

@@ -5,31 +5,22 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}">
+                    <a href="{{ route('organizer.dashboard') }}">
                         <img src="{{ asset('images/kheventslogo.jpg') }}" alt="KHEVENT Logo" class="block h-9 w-auto">
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @php
-                        $dashboardRoute = 'dashboard'; // Default
-                        if (Auth::user()->role->name === 'admin') {
-                            $dashboardRoute = 'admin.dashboard';
-                        } elseif (Auth::user()->role->name === 'organizer') {
-                            $dashboardRoute = 'organizer.dashboard';
-                        }
-                    @endphp
-                    <x-nav-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)">
+                    <x-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-
-                    {{-- Add other role-specific links here if needed --}}
-                    @if(Auth::user()->role->name === 'organizer')
-                        <x-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
-                            {{ __('My Events') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
+                        {{ __('My Events') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('organizer.events.create')" :active="request()->routeIs('organizer.events.create')">
+                        {{ __('Create Event') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -49,7 +40,6 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        {{-- CORRECTED ROUTE --}}
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -83,16 +73,14 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @php
-                $responsiveDashboardRoute = 'dashboard'; // Default
-                if (Auth::user()->role->name === 'admin') {
-                    $responsiveDashboardRoute = 'admin.dashboard';
-                } elseif (Auth::user()->role->name === 'organizer') {
-                    $responsiveDashboardRoute = 'organizer.dashboard';
-                }
-            @endphp
-            <x-responsive-nav-link :href="route($responsiveDashboardRoute)" :active="request()->routeIs($responsiveDashboardRoute)">
+            <x-responsive-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
+                {{ __('My Events') }}
+            </x-responsive-nav-link>
+             <x-responsive-nav-link :href="route('organizer.events.create')" :active="request()->routeIs('organizer.events.create')">
+                {{ __('Create Event') }}
             </x-responsive-nav-link>
         </div>
 
@@ -104,7 +92,6 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                {{-- CORRECTED ROUTE --}}
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>

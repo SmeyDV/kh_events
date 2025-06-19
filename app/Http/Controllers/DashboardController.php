@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -13,7 +14,7 @@ class DashboardController extends Controller
         $userCount = User::count();
         $eventCount = \App\Models\Event::count();
         $organizerCount = User::whereHas('role', function ($q) {
-            $q->where('slug', 'organizer');
+            $q->where('name', 'organizer');
         })->count();
         $pendingEventCount = \App\Models\Event::where('status', 'draft')->count();
 
@@ -28,7 +29,13 @@ class DashboardController extends Controller
 
     public function organizer(): View
     {
-        return view('organizer.dashboard');
+        $organizer = Auth::user();
+
+        $totalEvents = $organizer->events()->count();
+        $publishedEvents = $organizer->events()->where('status', 'published')->count();
+        $pendingEvents = $organizer->events()->where('status', 'draft')->count();
+
+        return view('organizer.dashboard', compact('totalEvents', 'publishedEvents', 'pendingEvents'));
     }
 
     public function reports(): View

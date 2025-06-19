@@ -28,14 +28,22 @@
                 </div>
                 <div class="hidden sm:flex items-center space-x-6">
                     @if (Route::has('login'))
-                    @auth
-                    <a href="{{ route('profile') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">My Profile</a>
-                    @else
-                    <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
-                    @if (Route::has('register'))
-                    <a href="{{ route('register') }}" class="font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 transition-all duration-250 transform hover:scale-105">Register</a>
-                    @endif
-                    @endauth
+                        @auth
+                            @php
+                                $dashboardRoute = 'dashboard'; // Default route
+                                if (Auth::user()->role->name === 'admin') {
+                                    $dashboardRoute = 'admin.dashboard';
+                                } elseif (Auth::user()->role->name === 'organizer') {
+                                    $dashboardRoute = 'organizer.dashboard';
+                                }
+                            @endphp
+                            <a href="{{ route($dashboardRoute) }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Dashboard</a>
+                        @else
+                            <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}" class="font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 transition-all duration-250 transform hover:scale-105">Register</a>
+                            @endif
+                        @endauth
                     @endif
                 </div>
             </nav>
