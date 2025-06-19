@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Http\Controllers\Controller;
 
-class AdminEventController extends Controller
+class EventController extends Controller
 {
   // List all pending events for approval
   public function index(): View
   {
     $pendingEvents = Event::where('status', 'draft')->with('organizer')->latest()->get();
-    return view('admin.events', compact('pendingEvents'));
+    return view('admin.events.index', compact('pendingEvents'));
   }
 
   // Approve an event

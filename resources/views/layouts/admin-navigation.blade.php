@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('admin.dashboard') }}">
-                         <img src="{{ asset('images/kheventslogo.jpg') }}" alt="KHEVENT Logo" class="block h-9 w-auto">
+                        <img src="{{ asset('images/kheventslogo.jpg') }}" alt="KHEVENT Logo" class="block h-9 w-auto">
                     </a>
                 </div>
 
@@ -16,7 +16,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('admin.events')" :active="request()->routeIs('admin.events')">
-                        {{ __('Manage Events') }}
+                        {{ __('Review Events') }}
                     </x-nav-link>
                     <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')">
                         {{ __('Manage Users') }}
@@ -49,7 +49,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>

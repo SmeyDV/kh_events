@@ -23,6 +23,7 @@ class Event extends Model
         'ticket_price',
         'status',
         'image_path',
+        'organizer_id',
     ];
 
     protected $casts = [
@@ -36,7 +37,7 @@ class Event extends Model
      */
     public function organizer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'organizer_id');
     }
 
     /**

@@ -57,11 +57,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the events for the user.
+     * Get the events for the user (as organizer).
      */
     public function events(): HasMany
     {
-        return $this->hasMany(Event::class, 'user_id');
+        return $this->hasMany(Event::class, 'organizer_id');
     }
 
     /**

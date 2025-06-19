@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\AdminEventController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboardController;
+use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
+use App\Http\Controllers\User\BookingController;
+use App\Http\Controllers\User\ProfileController;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 
@@ -19,8 +20,8 @@ Route::get('/', function () {
 })->name('home');
 
 // Public event listing and detail pages
-Route::get('/events', [EventController::class, 'index'])->name('events.index');
-Route::get('/events/{event}', [EventController::class, 'show'])->where('event', '[0-9]+')->name('events.show');
+Route::get('/events', [OrganizerEventController::class, 'index'])->name('events.index');
+Route::get('/events/{event}', [OrganizerEventController::class, 'show'])->where('event', '[0-9]+')->name('events.show');
 
 
 // --- AUTHENTICATED ROUTES ---
@@ -45,29 +46,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // --- ORGANIZER ROUTES ---
     Route::prefix('organizer')->name('organizer.')->middleware(['role:organizer'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'organizer'])->name('dashboard');
-        Route::get('/myevents', [EventController::class, 'myEvents'])->name('my-events');
+        Route::get('/dashboard', [OrganizerDashboardController::class, 'organizer'])->name('dashboard');
+        Route::get('/myevents', [OrganizerEventController::class, 'myEvents'])->name('my-events');
 
         // Simplified Event Management Routes
-        Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
-        Route::post('/events', [EventController::class, 'store'])->name('events.store');
-        Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
-        Route::patch('/events/{event}', [EventController::class, 'update'])->name('events.update');
-        Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+        Route::get('/events/create', [OrganizerEventController::class, 'create'])->name('events.create');
+        Route::post('/events', [OrganizerEventController::class, 'store'])->name('events.store');
+        Route::get('/events/{event}/edit', [OrganizerEventController::class, 'edit'])->name('events.edit');
+        Route::patch('/events/{event}', [OrganizerEventController::class, 'update'])->name('events.update');
+        Route::delete('/events/{event}', [OrganizerEventController::class, 'destroy'])->name('events.destroy');
     });
 
     // --- ADMIN ROUTES ---
     Route::prefix('admin')->name('admin.')->middleware(['role:admin'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
-        Route::get('/users', [DashboardController::class, 'users'])->name('users');
+        Route::get('/dashboard', [AdminDashboardController::class, 'admin'])->name('dashboard');
+        Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
         Route::get('/events', [AdminEventController::class, 'index'])->name('events');
+        Route::get('/events/{event}', [AdminEventController::class, 'show'])->name('events.show');
         Route::post('/events/{id}/approve', [AdminEventController::class, 'approve'])->name('events.approve');
         Route::post('/events/{id}/reject', [AdminEventController::class, 'reject'])->name('events.reject');
     });
 
     // Routes accessible by both admin and organizer
     Route::middleware(['role:admin,organizer'])->group(function () {
-        Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
+        Route::get('/reports', [AdminDashboardController::class, 'reports'])->name('reports');
     });
 });
 
