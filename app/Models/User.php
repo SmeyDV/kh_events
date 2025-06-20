@@ -75,9 +75,9 @@ class User extends Authenticatable
     /**
      * Check if the user has the given role.
      */
-    public function hasRole(string $roleSlug): bool
+    public function hasRole(string $role): bool
     {
-        return $this->role && $this->role->slug === $roleSlug;
+        return strtolower($this->role->slug) === strtolower($role);
     }
 
     /**

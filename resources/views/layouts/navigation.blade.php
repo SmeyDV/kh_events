@@ -1,71 +1,112 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-white/10 w-full py-4 px-6 fixed top-0 z-50">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}">
-                        <img src="{{ asset('images/kheventslogo.jpg') }}" alt="KHEVENT Logo" class="block h-9 w-auto">
+                        <img src="{{ asset('images/kheventslogo.png') }}" alt="KHEVENT Logo" class="block h-12 w-auto">
                     </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @php
-                        $dashboardRoute = 'dashboard'; // Default
-                        if (Auth::user()->role->name === 'admin') {
-                            $dashboardRoute = 'admin.dashboard';
-                        } elseif (Auth::user()->role->name === 'organizer') {
-                            $dashboardRoute = 'organizer.dashboard';
-                        }
-                    @endphp
-                    <x-nav-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-
-                    {{-- Add other role-specific links here if needed --}}
-                    @if(Auth::user()->role->name === 'organizer')
-                        <x-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
-                            {{ __('My Events') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+            <!-- Search Bar and City Dropdown -->
+            <div class="hidden sm:flex flex-grow max-w-xl mx-auto items-center gap-2">
+                <form action="{{ route('events.index') }}" method="GET" class="w-full flex gap-2">
+                    <select name="city" onchange="this.form.submit()" class="rounded border-gray-300 dark:bg-gray-700 dark:text-gray-100">
+                        <option value="">All Cities</option>
+                        @foreach($cities as $city)
+                        <option value="{{ $city }}" @if(request('city')==$city) selected @endif>{{ $city }}</option>
+                        @endforeach
+                    </select>
+                    <div class="relative flex-grow">
+                        <input type="search" name="search" placeholder="Search events..." value="{{ request('search') }}"
+                            class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                            </svg>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+            <!-- Navigation Links -->
+            <div class="hidden sm:flex items-center space-x-6">
+                @auth
+                @php
+                $profileRoute = 'profile.edit'; // Default for user
+                if (Auth::user()->role->name === 'admin') {
+                $profileRoute = 'admin.profile.edit';
+                } elseif (Auth::user()->role->name === 'organizer') {
+                $profileRoute = 'organizer.profile.edit';
+                }
+                @endphp
 
-                    <x-slot name="content">
-                        {{-- CORRECTED ROUTE --}}
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
+                @if(strtolower(Auth::user()->role->name) === 'admin')
+                <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-nav-link>
+                @elseif(strtolower(Auth::user()->role->name) === 'organizer')
+                <x-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-nav-link>
+                <x-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
+                    {{ __('My Events') }}
+                </x-nav-link>
+                <x-nav-link :href="route('organizer.events.create')" :active="request()->routeIs('organizer.events.create')">
+                    {{ __('Create Event') }}
+                </x-nav-link>
+                @else
+                {{-- Default for 'user' role --}}
+                <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
+                    {{ __('Events') }}
+                </x-nav-link>
+                <x-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')">
+                    {{ __('My Tickets') }}
+                </x-nav-link>
+                @endif
 
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
+                <!-- Settings Dropdown -->
+                <div class="hidden sm:flex sm:items-center sm:ms-6">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                <div>{{ Auth::user()->name }}</div>
 
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route($profileRoute)">
+                                {{ __('Profile') }}
                             </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+
+                                <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                            this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+                @else
+                <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
+                @if (Route::has('register'))
+                <a href="{{ route('register') }}" class="font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 transition-all duration-250 transform hover:scale-105">Register</a>
+                @endif
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -82,18 +123,24 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        @auth
         <div class="pt-2 pb-3 space-y-1">
-            @php
-                $responsiveDashboardRoute = 'dashboard'; // Default
-                if (Auth::user()->role->name === 'admin') {
-                    $responsiveDashboardRoute = 'admin.dashboard';
-                } elseif (Auth::user()->role->name === 'organizer') {
-                    $responsiveDashboardRoute = 'organizer.dashboard';
-                }
-            @endphp
-            <x-responsive-nav-link :href="route($responsiveDashboardRoute)" :active="request()->routeIs($responsiveDashboardRoute)">
+            @if(strtolower(Auth::user()->role->name) === 'admin')
+            <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @elseif(strtolower(Auth::user()->role->name) === 'organizer')
+            <x-responsive-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            @else
+            <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
+                {{ __('Events') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')">
+                {{ __('My Tickets') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -104,8 +151,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                {{-- CORRECTED ROUTE --}}
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <x-responsive-nav-link :href="route($profileRoute)">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
@@ -114,12 +160,22 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
             </div>
         </div>
+        @else
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">
+                {{ __('Log in') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">
+                {{ __('Register') }}
+            </x-responsive-nav-link>
+        </div>
+        @endauth
     </div>
 </nav>

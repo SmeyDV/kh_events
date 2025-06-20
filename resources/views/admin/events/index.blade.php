@@ -19,7 +19,27 @@
               </tr>
             </thead>
             <tbody>
-              {{-- Event rows will go here --}}
+              @forelse($pendingEvents as $event)
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">{{ $event->title }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ $event->organizer->name ?? '-' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst($event->status) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap flex gap-2">
+                  <form action="{{ route('admin.events.approve', $event->id) }}" method="POST" onsubmit="return confirm('Approve this event?');">
+                    @csrf
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">Approve</button>
+                  </form>
+                  <form action="{{ route('admin.events.reject', $event->id) }}" method="POST" onsubmit="return confirm('Reject this event?');">
+                    @csrf
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">Reject</button>
+                  </form>
+                </td>
+              </tr>
+              @empty
+              <tr>
+                <td colspan="4" class="px-6 py-4 text-center text-gray-500">No pending events.</td>
+              </tr>
+              @endforelse
             </tbody>
           </table>
         </div>

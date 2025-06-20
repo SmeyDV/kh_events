@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organizer_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('categories');
             $table->string('title');
             $table->text('description');
             $table->string('venue');
+            $table->string('city')->nullable();
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->integer('capacity')->nullable();

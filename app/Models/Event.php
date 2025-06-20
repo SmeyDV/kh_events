@@ -17,6 +17,7 @@ class Event extends Model
         'title',
         'description',
         'venue',
+        'city',
         'start_date',
         'end_date',
         'capacity',
@@ -24,6 +25,7 @@ class Event extends Model
         'status',
         'image_path',
         'organizer_id',
+        'category_id',
     ];
 
     protected $casts = [
@@ -113,5 +115,10 @@ class Event extends Model
     public function isCancelled(): bool
     {
         return $this->status === 'cancelled';
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

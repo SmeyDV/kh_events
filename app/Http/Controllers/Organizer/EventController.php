@@ -6,6 +6,7 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Category;
 
 class EventController extends Controller
 {
@@ -19,7 +20,8 @@ class EventController extends Controller
 
   public function create(): \Illuminate\View\View
   {
-    return view('organizer.events.create');
+    $categories = Category::all();
+    return view('organizer.events.create', compact('categories'));
   }
 
   public function store(\Illuminate\Http\Request $request)
@@ -33,6 +35,7 @@ class EventController extends Controller
       'capacity' => 'required|integer|min:1',
       'ticket_price' => 'nullable|numeric|min:0',
       'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      'category_id' => 'required|exists:categories,id',
     ]);
 
     $validated['organizer_id'] = Auth::id();
@@ -46,9 +49,17 @@ class EventController extends Controller
     return redirect()->route('organizer.my-events')->with('success', 'Event created successfully. It is now pending admin approval.');
   }
 
+  public function show(\App\Models\Event $event): \Illuminate\View\View
+  {
+    // Eager load bookings and users to prevent N+1 queries in the view
+    $event->load('bookings.user');
+    return view('organizer.events.show', compact('event'));
+  }
+
   public function edit(\App\Models\Event $event): \Illuminate\View\View
   {
-    return view('organizer.events.edit', compact('event'));
+    $categories = Category::all();
+    return view('organizer.events.edit', compact('event', 'categories'));
   }
 
   public function update(\Illuminate\Http\Request $request, \App\Models\Event $event)
@@ -62,6 +73,7 @@ class EventController extends Controller
       'capacity' => 'required|integer|min:1',
       'ticket_price' => 'nullable|numeric|min:0',
       'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      'category_id' => 'required|exists:categories,id',
     ]);
 
     if ($request->hasFile('image')) {
@@ -71,5 +83,15 @@ class EventController extends Controller
     $event->update($validated);
 
     return redirect()->route('organizer.my-events')->with('success', 'Event updated successfully.');
+  }
+
+  public function destroy(\App\Models\Event $event)
+  {
+    // Add authorization if needed, e.g., using policies
+    // $this->authorize('delete', $event);
+
+    $event->delete();
+
+    return redirect()->route('organizer.my-events')->with('success', 'Event deleted successfully.');
   }
 }

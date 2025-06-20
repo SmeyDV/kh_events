@@ -13,14 +13,14 @@
 
                     {{-- Displaying Validation Errors --}}
                     @if ($errors->any())
-                        <div class="mb-4 p-4 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 rounded-lg">
-                            <strong class="font-bold">Whoops!</strong> There were some problems with your input.
-                            <ul class="mt-2 list-disc list-inside">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                    <div class="mb-4 p-4 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 rounded-lg">
+                        <strong class="font-bold">Whoops!</strong> There were some problems with your input.
+                        <ul class="mt-2 list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                     @endif
 
                     <form action="{{ route('organizer.events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
@@ -51,11 +51,33 @@
                                 <x-text-input id="end_date" class="block mt-1 w-full" type="datetime-local" name="end_date" :value="old('end_date')" required />
                             </div>
                         </div>
-                        
+
                         <!-- Venue -->
                         <div>
                             <x-input-label for="venue" :value="__('Venue / Location')" />
                             <x-text-input id="venue" class="block mt-1 w-full" type="text" name="venue" :value="old('venue')" required />
+                        </div>
+                        <!-- City -->
+                        <div>
+                            <x-input-label for="city" :value="__('City')" />
+                            <select id="city" name="city" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                                <option value="">Select a city</option>
+                                @foreach(config('app.kh_cities') as $city)
+                                <option value="{{ $city }}" {{ old('city') == $city ? 'selected' : '' }}>{{ $city }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <x-input-label for="category_id" :value="__('Category')" />
+                            <select id="category_id" name="category_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                                <option value="">Select a category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -78,7 +100,7 @@
                             <input id="image" class="block mt-1 w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none" type="file" name="image">
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB.</p>
                         </div>
-                        
+
                         <div class="flex items-center justify-end mt-6">
                             <a href="{{ route('organizer.my-events') }}" class="text-gray-600 dark:text-gray-400 hover:underline mr-4">
                                 Cancel
