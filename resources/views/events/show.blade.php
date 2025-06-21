@@ -1,53 +1,49 @@
 <x-app-layout>
   <x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
       {{ $event->title }}
     </h2>
   </x-slot>
 
-  <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 bg-white border-b border-gray-200">
-          <div class="container mx-auto px-4">
-            @if($event->image_path)
-            <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}" class="w-full h-96 object-cover rounded-lg mb-6">
-            @endif
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      <div class="h-64 bg-cover bg-center" style="background-image: url('{{ $event->image_path ? asset('storage/' . $event->image_path) : 'https://via.placeholder.com/800x400' }}');">
+      </div>
+      <div class="p-6 md:p-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ $event->title }}</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Organized by <span class="font-semibold">{{ $event->organizer->name }}</span></p>
 
-            <h1 class="text-4xl font-bold mb-4">{{ $event->title }}</h1>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="md:col-span-2">
-                <p class="text-gray-700 text-lg">
-                  {{ $event->description }}
-                </p>
-              </div>
-
-              <div class="space-y-4">
-                <div class="bg-gray-100 p-4 rounded-lg">
-                  <h3 class="font-bold text-lg mb-2">Event Details</h3>
-                  <p><strong>Date:</strong> {{ $event->start_date->format('M d, Y') }} - {{ $event->end_date->format('M d, Y') }}</p>
-                  <p><strong>Venue:</strong> {{ $event->venue }}</p>
-                  <p><strong>Price:</strong> {{ $event->ticket_price > 0 ? '$' . number_format($event->ticket_price, 2) : 'Free' }}</p>
-                  <p><strong>Capacity:</strong> {{ $event->capacity }}</p>
-                </div>
-
-                @auth
-                @if($event->capacity > 0)
-                <a href="{{ route('bookings.create', $event) }}" class="w-full text-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded block">
-                  Book Your Ticket
-                </a>
-                @else
-                <p class="text-center bg-red-500 text-white font-bold py-3 px-4 rounded">Sold Out</p>
-                @endif
-                @else
-                <a href="{{ route('login') }}" class="w-full text-center bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded block">
-                  Log in to Book
-                </a>
-                @endauth
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Event Details</h2>
+            <div class="text-gray-700 dark:text-gray-300 space-y-2">
+              <p><span class="font-semibold">Date:</span> {{ $event->start_date->format('F j, Y, g:i a') }} - {{ $event->end_date->format('F j, Y, g:i a') }}</p>
+              <p><span class="font-semibold">Venue:</span> {{ $event->venue }}, {{ $event->city }}</p>
+              <p><span class="font-semibold">Category:</span> {{ $event->category->name }}</p>
             </div>
           </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Tickets</h2>
+            <div class="text-gray-700 dark:text-gray-300 space-y-2">
+              <p><span class="font-semibold">Price:</span> {{ $event->ticket_price > 0 ? '$' . number_format($event->ticket_price, 2) : 'Free' }}</p>
+              <p><span class="font-semibold">Capacity:</span> {{ $event->capacity ?? 'Not specified' }}</p>
+              <p><span class="font-semibold">Tickets Left:</span> {{ $event->getRemainingTicketsAttribute() ?? 'N/A' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="prose max-w-none text-gray-800 dark:text-gray-200 mb-8">
+          {!! nl2br(e($event->description)) !!}
+        </div>
+
+        <div class="text-center">
+          @if($event->isAvailableForBooking())
+          <a href="{{ route('bookings.create', $event) }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+            Book Your Spot
+          </a>
+          @else
+          <p class="text-red-500 font-semibold">Booking is currently unavailable for this event.</p>
+          @endif
         </div>
       </div>
     </div>

@@ -1,45 +1,55 @@
-// Function to apply theme changes
-function applyTheme(theme) {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
-    localStorage.setItem('color-theme', 'dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-    localStorage.setItem('color-theme', 'light');
-  }
-}
+// On page load or when changing themes, best to add inline in `head` to avoid FOUC
+// This script is added to the <head> of the page in app.blade.php
+// if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+//     document.documentElement.classList.add('dark');
+// } else {
+//     document.documentElement.classList.remove('dark')
+// }
 
-// Function to toggle theme and icons
-function toggleTheme(darkIcon, lightIcon) {
-  darkIcon.classList.toggle('hidden');
-  lightIcon.classList.toggle('hidden');
+var themeToggleBtn = document.getElementById("theme-toggle");
+if (themeToggleBtn) {
+    var themeToggleDarkIcon = document.getElementById("theme-toggle-dark-icon");
+    var themeToggleLightIcon = document.getElementById(
+        "theme-toggle-light-icon"
+    );
 
-  const currentTheme = localStorage.getItem('color-theme')
-    ? (localStorage.getItem('color-theme') === 'light' ? 'dark' : 'light')
-    : (document.documentElement.classList.contains('dark') ? 'light' : 'dark');
-
-  applyTheme(currentTheme);
-}
-
-// Function to initialize a theme toggle button
-function initThemeToggleButton(btnId, darkIconId, lightIconId) {
-  const btn = document.getElementById(btnId);
-  const darkIcon = document.getElementById(darkIconId);
-  const lightIcon = document.getElementById(lightIconId);
-
-  if (btn && darkIcon && lightIcon) {
-    // Set initial icon visibility
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      lightIcon.classList.remove('hidden');
-    } else {
-      darkIcon.classList.remove('hidden');
+    // Function to set the icon state
+    function setIconState() {
+        if (document.documentElement.classList.contains("dark")) {
+            themeToggleDarkIcon.classList.add("hidden");
+            themeToggleLightIcon.classList.remove("hidden");
+        } else {
+            themeToggleDarkIcon.classList.remove("hidden");
+            themeToggleLightIcon.classList.add("hidden");
+        }
     }
 
-    // Add click listener
-    btn.addEventListener('click', () => toggleTheme(darkIcon, lightIcon));
-  }
-}
+    // Set initial state
+    setIconState();
 
-// Initialize both buttons
-initThemeToggleButton('theme-toggle', 'theme-toggle-dark-icon', 'theme-toggle-light-icon');
-initThemeToggleButton('theme-toggle-responsive', 'theme-toggle-dark-icon-responsive', 'theme-toggle-light-icon-responsive'); 
+    themeToggleBtn.addEventListener("click", function () {
+        // Toggle the theme
+        if (localStorage.getItem("color-theme")) {
+            // If light, switch to dark and save theme
+            if (localStorage.getItem("color-theme") === "light") {
+                document.documentElement.classList.add("dark");
+                localStorage.setItem("color-theme", "dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+                localStorage.setItem("color-theme", "light");
+            }
+        } else {
+            // If not set, check the system preference and toggle based on that
+            if (document.documentElement.classList.contains("dark")) {
+                document.documentElement.classList.remove("dark");
+                localStorage.setItem("color-theme", "light");
+            } else {
+                document.documentElement.classList.add("dark");
+                localStorage.setItem("color-theme", "dark");
+            }
+        }
+
+        // Update icon state after click
+        setIconState();
+    });
+}

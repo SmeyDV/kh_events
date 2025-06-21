@@ -7,8 +7,8 @@
 
   <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
+      <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900 dark:text-gray-100">
           <div class="container mx-auto px-4">
             <h1 class="text-3xl font-bold mb-6">Upcoming Events</h1>
 
@@ -25,7 +25,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               @forelse($events as $event)
-              <div class="bg-white rounded-lg shadow-md overflow-hidden">
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                 <a href="{{ route('events.show', $event) }}">
                   @if($event->image_path)
                   <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
@@ -37,10 +37,10 @@
                   <h2 class="text-xl font-bold mb-2">
                     <a href="{{ route('events.show', $event) }}">{{ $event->title }}</a>
                   </h2>
-                  <p class="text-sm text-gray-500 mb-1">By {{ $event->organizer->name }}</p>
-                  <p class="text-gray-600 mb-2">{{ $event->start_date->format('M d, Y') }}</p>
-                  <p class="text-gray-500 mb-2">{{ $event->city }}</p>
-                  <p class="text-gray-700">{{ Str::limit($event->description, 100) }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">By {{ $event->organizer->name }}</p>
+                  <p class="text-gray-600 dark:text-gray-400 mb-2">{{ $event->start_date->format('M d, Y') }}</p>
+                  <p class="text-gray-500 dark:text-gray-400 mb-2">{{ $event->city }}</p>
+                  <p class="text-gray-700 dark:text-gray-200">{{ Str::limit($event->description, 100) }}</p>
                   <div class="mt-4 flex justify-between items-center">
                     <span class="font-bold text-lg">{{ $event->ticket_price > 0 ? '$' . number_format($event->ticket_price, 2) : 'Free' }}</span>
                     <a href="{{ route('events.show', $event) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -51,8 +51,8 @@
               </div>
               @empty
               <div class="col-span-full text-center py-12">
-                <h2 class="text-xl font-semibold text-gray-700">No events found</h2>
-                <p class="text-gray-500 mt-2">Try adjusting your search or check back later.</p>
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300">No events found</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">Try adjusting your search or check back later.</p>
               </div>
               @endforelse
             </div>

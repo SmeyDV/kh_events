@@ -68,6 +68,8 @@
                 </x-nav-link>
                 @endif
 
+                @include('layouts.partials.theme-toggle-button')
+
                 <!-- Settings Dropdown -->
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     <x-dropdown align="right" width="48">
@@ -106,6 +108,7 @@
                 @if (Route::has('register'))
                 <a href="{{ route('register') }}" class="font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 transition-all duration-250 transform hover:scale-105">Register</a>
                 @endif
+                @include('layouts.partials.theme-toggle-button')
                 @endauth
             </div>
 
