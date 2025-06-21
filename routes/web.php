@@ -16,7 +16,7 @@ use App\Http\Controllers\Auth\AdminRegisterController;
 use Illuminate\Support\Facades\Route;
 
 // --- PUBLIC ROUTES ---
-Route::middleware(['redirect.admin'])->group(function () {
+Route::middleware(['web'])->group(function () {
     Route::get('/', function () {
         $upcomingEvents = Event::where('status', 'published')
             ->where('start_date', '>', now())
