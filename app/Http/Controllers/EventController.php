@@ -16,8 +16,10 @@ class EventController extends Controller
 
     if ($request->has('search')) {
       $searchTerm = $request->input('search');
-      $query->where('title', 'like', '%' . $searchTerm . '%')
-        ->orWhere('description', 'like', '%' . $searchTerm . '%');
+      $query->where(function ($q) use ($searchTerm) {
+        $q->where('title', 'like', '%' . $searchTerm . '%')
+          ->orWhere('description', 'like', '%' . $searchTerm . '%');
+      });
     }
 
     $cities = Event::whereNotNull('city')->distinct()->pluck('city');

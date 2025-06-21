@@ -5,17 +5,17 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h3 class="text-2xl font-bold mb-6">Event Details</h3>
+                <div class="p-4 text-gray-900 dark:text-gray-100">
+                    <h3 class="text-xl font-bold mb-4">Event Details</h3>
 
                     {{-- Displaying Validation Errors --}}
                     @if ($errors->any())
-                    <div class="mb-4 p-4 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 rounded-lg">
+                    <div class="mb-3 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 rounded-lg">
                         <strong class="font-bold">Whoops!</strong> There were some problems with your input.
-                        <ul class="mt-2 list-disc list-inside">
+                        <ul class="mt-1 list-disc list-inside text-sm">
                             @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                             @endforeach
@@ -23,7 +23,7 @@
                     </div>
                     @endif
 
-                    <form action="{{ route('organizer.events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <form action="{{ route('organizer.events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf
 
                         <!-- Event Title -->
@@ -35,10 +35,10 @@
                         <!-- Event Description -->
                         <div>
                             <x-input-label for="description" :value="__('Description')" />
-                            <textarea id="description" name="description" rows="5" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description') }}</textarea>
+                            <textarea id="description" name="description" rows="3" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description') }}</textarea>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Start Date -->
                             <div>
                                 <x-input-label for="start_date" :value="__('Start Date & Time')" />
@@ -57,6 +57,7 @@
                             <x-input-label for="venue" :value="__('Venue / Location')" />
                             <x-text-input id="venue" class="block mt-1 w-full" type="text" name="venue" :value="old('venue')" required />
                         </div>
+
                         <!-- City -->
                         <div>
                             <x-input-label for="city" :value="__('City')" />
@@ -74,13 +75,13 @@
                             <select id="category_id" name="category_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
                                 <option value="">Select a category</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Capacity -->
                             <div>
                                 <x-input-label for="capacity" :value="__('Capacity (Number of tickets)')" />
@@ -98,10 +99,10 @@
                         <div>
                             <x-input-label for="image" :value="__('Event Poster / Image')" />
                             <input id="image" class="block mt-1 w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none" type="file" name="image">
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB.</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB.</p>
                         </div>
 
-                        <div class="flex items-center justify-end mt-6">
+                        <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('organizer.my-events') }}" class="text-gray-600 dark:text-gray-400 hover:underline mr-4">
                                 Cancel
                             </a>

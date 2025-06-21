@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@khevents.com',
             'password' => Hash::make('password'),
             'role_id' => $adminRole->id,
-            'email_verified_at' => now(),
+            'email_verified_at' => now(),   
         ]);
 
         // Create organizer user

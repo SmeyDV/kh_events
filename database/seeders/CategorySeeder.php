@@ -19,14 +19,18 @@ class CategorySeeder extends Seeder
             'Food & Drink',
             'Charity & Causes',
             'Hobbies',
+            'Tech',
+            'Fashion'
         ];
 
         foreach ($categories as $name) {
-            Category::create([
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'description' => null,
-            ]);
+            Category::firstOrCreate(
+                ['name' => $name],
+                [
+                    'slug' => Str::slug($name),
+                    'description' => null,
+                ]
+            );
         }
     }
 }

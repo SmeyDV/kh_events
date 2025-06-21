@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Event;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,18 @@ class EventSeeder extends Seeder
      */
     public function run(): void
     {
-        $organizer = User::where('email', 'organizer@example.com')->first();
+        // Get the organizer role
+        $organizerRole = Role::where('slug', 'organizer')->first();
+
+        // Get all users with the organizer role
+        $organizers = User::where('role_id', $organizerRole->id)->get();
+
+        // If there are no organizers, you might want to create one or stop the seeder
+        if ($organizers->isEmpty()) {
+            $this->command->info('No organizers found. Skipping event seeding.');
+            return;
+        }
+
         $categories = Category::all();
 
         $events = [
@@ -89,6 +101,8 @@ class EventSeeder extends Seeder
 
         foreach ($events as $eventData) {
             $category = $categories->firstWhere('name', $eventData['category']);
+            $organizer = $organizers->random(); // Assign a random organizer
+
             if ($organizer && $category) {
                 Event::create([
                     'organizer_id' => $organizer->id,

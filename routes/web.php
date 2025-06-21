@@ -16,38 +16,40 @@ use App\Http\Controllers\Auth\AdminRegisterController;
 use Illuminate\Support\Facades\Route;
 
 // --- PUBLIC ROUTES ---
-Route::get('/', function () {
-    $upcomingEvents = Event::where('status', 'published')
-        ->where('start_date', '>', now())
-        ->orderBy('start_date', 'asc')
-        ->take(3)
-        ->get();
-    $categories = \App\Models\Category::all();
-    $tabs = [
-        ['label' => 'All', 'active' => true],
-        ['label' => 'For you', 'active' => false],
-        ['label' => 'Online', 'active' => false],
-        ['label' => 'Today', 'active' => false],
-        ['label' => 'This weekend', 'active' => false],
-        ['label' => 'Free', 'active' => false],
-    ];
-    $organizerCta = [
-        'title' => 'Make your own event',
-        'description' => 'Got a show, a party, or a workshop to share? Join our community of organizers and bring your event to life on our platform.',
-        'button' => [
-            'label' => 'Create Your Event',
-            'url' => route('register.organizer'),
-        ],
-    ];
-    $cities = config('app.kh_cities');
-    return view('welcome', [
-        'upcomingEvents' => $upcomingEvents,
-        'categories' => $categories,
-        'tabs' => $tabs,
-        'organizerCta' => $organizerCta,
-        'cities' => $cities,
-    ]);
-})->name('home');
+Route::middleware(['redirect.admin'])->group(function () {
+    Route::get('/', function () {
+        $upcomingEvents = Event::where('status', 'published')
+            ->where('start_date', '>', now())
+            ->orderBy('start_date', 'asc')
+            ->take(3)
+            ->get();
+        $categories = \App\Models\Category::all();
+        $tabs = [
+            ['label' => 'All', 'active' => true],
+            ['label' => 'For you', 'active' => false],
+            ['label' => 'Online', 'active' => false],
+            ['label' => 'Today', 'active' => false],
+            ['label' => 'This weekend', 'active' => false],
+            ['label' => 'Free', 'active' => false],
+        ];
+        $organizerCta = [
+            'title' => 'Make your own event',
+            'description' => 'Got a show, a party, or a workshop to share? Join our community of organizers and bring your event to life on our platform.',
+            'button' => [
+                'label' => 'Create Your Event',
+                'url' => route('register.organizer'),
+            ],
+        ];
+        $cities = config('app.kh_cities');
+        return view('welcome', [
+            'upcomingEvents' => $upcomingEvents,
+            'categories' => $categories,
+            'tabs' => $tabs,
+            'organizerCta' => $organizerCta,
+            'cities' => $cities,
+        ]);
+    })->name('home');
+});
 
 // Public event listing and detail pages
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
