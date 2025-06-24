@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organizer_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('category_id')->constrained('categories');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('title');
             $table->text('description');
             $table->string('venue');
@@ -27,6 +27,15 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             $table->timestamps();
             $table->softDeletes(); // Add soft deletes
+
+            // Add indexes for better performance
+            $table->index(['status', 'start_date']);
+            $table->index(['city', 'status']);
+            $table->index(['organizer_id', 'status']);
+            $table->index(['category_id', 'status']);
+            $table->index('start_date');
+            $table->index('status');
+            $table->fullText(['title', 'description', 'venue']);
         });
     }
 

@@ -7,7 +7,10 @@ use App\Models\Event;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class BookingController extends Controller
 {
@@ -19,10 +22,13 @@ class BookingController extends Controller
    * @param  \App\Models\Event  $event
    * @return \Illuminate\View\View
    */
-  public function create(Event $event)
+  public function create(Event $event): View
   {
-    // You might want to add logic here to check if the event is bookable
-    // (e.g., it's published, has remaining capacity, etc.)
+    // Check if event is available for booking
+    if (!$event->isAvailableForBooking()) {
+      abort(403, 'This event is not available for booking.');
+    }
+
     return view('bookings.create', compact('event'));
   }
 
@@ -33,29 +39,48 @@ class BookingController extends Controller
    * @param  \App\Models\Event  $event
    * @return \Illuminate\Http\RedirectResponse
    */
-  public function store(Request $request, Event $event)
+  public function store(Request $request, Event $event): RedirectResponse
   {
-    // This is a simplified store method.
-    // You would want to add validation, payment processing, etc.
-    $request->validate([
-      'quantity' => 'required|integer|min:1',
-    ]);
-
-    // Basic check for capacity
-    if ($event->capacity && $event->bookings()->sum('quantity') + $request->quantity > $event->capacity) {
-      return back()->with('error', 'Sorry, there are not enough tickets available.');
+    // Check if event is available for booking
+    if (!$event->isAvailableForBooking()) {
+      return back()->with('error', 'This event is not available for booking.');
     }
 
-    $total_amount = ($event->ticket_price ?? 0) * $request->quantity;
-
-    $booking = $event->bookings()->create([
-      'user_id' => Auth::id(),
-      'quantity' => $request->quantity,
-      'total_amount' => $total_amount,
-      // Add other relevant fields like total_amount if applicable
+    $request->validate([
+      'quantity' => 'required|integer|min:1|max:10',
     ]);
 
-    return redirect()->route('bookings.show', $booking)->with('success', 'Booking successful!');
+    $quantity = $request->input('quantity');
+
+    // Check capacity with database transaction
+    try {
+      DB::beginTransaction();
+
+      // Recheck capacity within transaction
+      if ($event->capacity && $event->remaining_tickets < $quantity) {
+        DB::rollBack();
+        return back()->with('error', 'Sorry, there are not enough tickets available.');
+      }
+
+      $totalAmount = ($event->ticket_price ?? 0) * $quantity;
+
+      $booking = $event->bookings()->create([
+        'user_id' => Auth::id(),
+        'quantity' => $quantity,
+        'total_amount' => $totalAmount,
+        'status' => 'confirmed',
+        'booking_date' => now(),
+      ]);
+
+      DB::commit();
+
+      return redirect()
+        ->route('bookings.show', $booking)
+        ->with('success', 'Booking successful!');
+    } catch (\Exception $e) {
+      DB::rollBack();
+      return back()->with('error', 'An error occurred while processing your booking. Please try again.');
+    }
   }
 
   /**
@@ -63,9 +88,13 @@ class BookingController extends Controller
    *
    * @return \Illuminate\View\View
    */
-  public function index()
+  public function index(): View
   {
-    $bookings = Auth::user()->bookings()->with('event')->latest()->paginate(10);
+    $bookings = Auth::user()->bookings()
+      ->with(['event.organizer', 'event.category'])
+      ->latest('booking_date')
+      ->paginate(10);
+
     return view('bookings.index', compact('bookings'));
   }
 
@@ -75,10 +104,14 @@ class BookingController extends Controller
    * @param  \App\Models\Booking  $booking
    * @return \Illuminate\View\View
    */
-  public function show(Booking $booking)
+  public function show(Booking $booking): View
   {
     // Add authorization check to ensure the user can view this booking
     $this->authorize('view', $booking);
+
+    // Eager load related data
+    $booking->load(['event.organizer', 'event.category']);
+
     return view('bookings.show', compact('booking'));
   }
 
@@ -88,15 +121,35 @@ class BookingController extends Controller
    * @param  \App\Models\Booking  $booking
    * @return \Illuminate\Http\RedirectResponse
    */
-  public function cancel(Booking $booking)
+  public function cancel(Booking $booking): RedirectResponse
   {
     // Add authorization check
     $this->authorize('delete', $booking);
 
-    // Add logic for cancellation (e.g., check if it's cancellable)
-    $booking->delete(); // Or update status to 'cancelled'
+    // Check if booking can be cancelled (e.g., not too close to event date)
+    if ($booking->event->start_date->diffInDays(now()) < 1) {
+      return back()->with('error', 'Cannot cancel booking within 24 hours of the event.');
+    }
 
-    return redirect()->route('bookings.index')->with('success', 'Booking cancelled successfully.');
+    // Check if booking is already cancelled
+    if ($booking->status === 'cancelled') {
+      return back()->with('error', 'Booking is already cancelled.');
+    }
+
+    try {
+      DB::beginTransaction();
+
+      $booking->update(['status' => 'cancelled']);
+
+      DB::commit();
+
+      return redirect()
+        ->route('bookings.index')
+        ->with('success', 'Booking cancelled successfully.');
+    } catch (\Exception $e) {
+      DB::rollBack();
+      return back()->with('error', 'An error occurred while cancelling the booking.');
+    }
   }
 
   // User booking logic here

@@ -4,43 +4,44 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class EventController extends Controller
 {
   /**
    * Display a listing of the resource.
    */
-  public function index(Request $request)
+  public function index(Request $request): View
   {
-    $query = Event::where('status', 'published');
+    $filters = [];
 
-    if ($request->has('search')) {
-      $searchTerm = $request->input('search');
-      $query->where(function ($q) use ($searchTerm) {
-        $q->where('title', 'like', '%' . $searchTerm . '%')
-          ->orWhere('description', 'like', '%' . $searchTerm . '%');
-      });
+    if ($request->filled('search')) {
+      $filters['search'] = $request->input('search');
     }
 
-    $cities = Event::whereNotNull('city')->distinct()->pluck('city');
     if ($request->filled('city')) {
-      $query->where('city', $request->input('city'));
+      $filters['city'] = $request->input('city');
     }
-    $events = $query->paginate(10)->withQueryString();
+
+    $events = Event::getPublishedEvents(10, $filters);
+    $cities = Event::getAvailableCities();
+
     return view('events.index', compact('events', 'cities'));
   }
 
   /**
    * Display the specified resource.
    */
-  public function show(Event $event)
+  public function show(Event $event): View
   {
     // Ensure the event is published or the user is authorized to see it
-    // For now, we assume if it's accessed publicly, it should be published.
     if ($event->status !== 'published') {
-      // Or handle as you see fit, maybe show for admins/organizers
       abort(404);
     }
+
+    // Eager load related data to prevent N+1 queries
+    $event->load(['organizer', 'category', 'bookings.user']);
+
     return view('events.show', compact('event'));
   }
 }

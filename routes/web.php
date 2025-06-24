@@ -10,51 +10,43 @@ use App\Http\Controllers\Organizer\ProfileController as OrganizerProfileControll
 use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Models\Event;
-use App\Models\Role;
+use App\Models\Category;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AdminRegisterController;
 use Illuminate\Support\Facades\Route;
 
 // --- PUBLIC ROUTES ---
-Route::middleware(['web'])->group(function () {
-    Route::get('/', function () {
-        $upcomingEvents = Event::where('status', 'published')
-            ->where('start_date', '>', now())
-            ->orderBy('start_date', 'asc')
-            ->take(3)
-            ->get();
-        $categories = \App\Models\Category::all();
-        $tabs = [
-            ['label' => 'All', 'active' => true],
-            ['label' => 'For you', 'active' => false],
-            ['label' => 'Online', 'active' => false],
-            ['label' => 'Today', 'active' => false],
-            ['label' => 'This weekend', 'active' => false],
-            ['label' => 'Free', 'active' => false],
-        ];
-        $organizerCta = [
-            'title' => 'Make your own event',
-            'description' => 'Got a show, a party, or a workshop to share? Join our community of organizers and bring your event to life on our platform.',
-            'button' => [
-                'label' => 'Create Your Event',
-                'url' => route('register.organizer'),
-            ],
-        ];
-        $cities = config('app.kh_cities');
-        return view('welcome', [
-            'upcomingEvents' => $upcomingEvents,
-            'categories' => $categories,
-            'tabs' => $tabs,
-            'organizerCta' => $organizerCta,
-            'cities' => $cities,
-        ]);
-    })->name('home');
-});
+Route::get('/', function () {
+    // Use cached data for better performance
+    $upcomingEvents = Event::getUpcomingEvents(3);
+    $categories = Category::all();
+
+    $tabs = [
+        ['label' => 'All', 'active' => true],
+        ['label' => 'For you', 'active' => false],
+        ['label' => 'Online', 'active' => false],
+        ['label' => 'Today', 'active' => false],
+        ['label' => 'This weekend', 'active' => false],
+        ['label' => 'Free', 'active' => false],
+    ];
+
+    $organizerCta = [
+        'title' => 'Make your own event',
+        'description' => 'Got a show, a party, or a workshop to share? Join our community of organizers and bring your event to life on our platform.',
+        'button' => [
+            'label' => 'Create Your Event',
+            'url' => route('register.organizer'),
+        ],
+    ];
+
+    $cities = config('app.kh_cities');
+
+    return view('welcome', compact('upcomingEvents', 'categories', 'tabs', 'organizerCta', 'cities'));
+})->name('home');
 
 // Public event listing and detail pages
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
-Route::get('/events/{event}', [EventController::class, 'show'])->where('event', '[0-9]+')->name('events.show');
-
+Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 
 // --- AUTHENTICATED ROUTES ---
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -83,7 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/profile', [OrganizerProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [OrganizerProfileController::class, 'destroy'])->name('profile.destroy');
 
-        // Simplified Event Management Routes
+        // Event Management Routes
         Route::get('/events/create', [OrganizerEventController::class, 'create'])->name('events.create');
         Route::post('/events', [OrganizerEventController::class, 'store'])->name('events.store');
         Route::get('/events/{event}', [OrganizerEventController::class, 'show'])->name('events.show');
@@ -102,10 +94,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [AdminProfileController::class, 'destroy'])->name('profile.destroy');
 
+        // Event Management
         Route::get('/events', [AdminEventController::class, 'index'])->name('events');
         Route::get('/events/{event}', [AdminEventController::class, 'show'])->name('events.show');
-        Route::post('/events/{id}/approve', [AdminEventController::class, 'approve'])->name('events.approve');
-        Route::post('/events/{id}/reject', [AdminEventController::class, 'reject'])->name('events.reject');
+        Route::post('/events/{event}/approve', [AdminEventController::class, 'approve'])->name('events.approve');
+        Route::post('/events/{event}/reject', [AdminEventController::class, 'reject'])->name('events.reject');
     });
 
     // Routes accessible by both admin and organizer
