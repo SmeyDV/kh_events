@@ -50,12 +50,34 @@ class Event extends Model
             Cache::forget('events.upcoming');
             Cache::forget('events.published');
             Cache::forget("events.city.{$event->city}");
+
+            // Clear all cached published events with different filters
+            Cache::forget('events.cities');
+
+            // Clear specific cache keys
+            Cache::forget("events.upcoming.3");
+            Cache::forget("events.upcoming.5");
+            Cache::forget("events.upcoming.10");
+
+            // Clear tickets sold cache for this event
+            Cache::forget("event.{$event->id}.tickets_sold");
         });
 
         static::deleted(function ($event) {
             Cache::forget('events.upcoming');
             Cache::forget('events.published');
             Cache::forget("events.city.{$event->city}");
+
+            // Clear all cached published events with different filters
+            Cache::forget('events.cities');
+
+            // Clear specific cache keys
+            Cache::forget("events.upcoming.3");
+            Cache::forget("events.upcoming.5");
+            Cache::forget("events.upcoming.10");
+
+            // Clear tickets sold cache for this event
+            Cache::forget("event.{$event->id}.tickets_sold");
         });
     }
 
@@ -241,5 +263,26 @@ class Event extends Model
                 ->sort()
                 ->values();
         });
+    }
+
+    /**
+     * Clear all event-related cache.
+     */
+    public static function clearAllCache()
+    {
+        Cache::forget('events.upcoming');
+        Cache::forget('events.published');
+        Cache::forget('events.cities');
+
+        // Clear specific cache keys
+        Cache::forget("events.upcoming.3");
+        Cache::forget("events.upcoming.5");
+        Cache::forget("events.upcoming.10");
+
+        // Clear all tickets sold cache
+        $events = static::all();
+        foreach ($events as $event) {
+            Cache::forget("event.{$event->id}.tickets_sold");
+        }
     }
 }

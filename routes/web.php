@@ -17,8 +17,13 @@ use Illuminate\Support\Facades\Route;
 
 // --- PUBLIC ROUTES ---
 Route::get('/', function () {
-    // Use cached data for better performance
-    $upcomingEvents = Event::getUpcomingEvents(3);
+    // Temporarily bypass caching for debugging
+    $upcomingEvents = Event::published()
+        ->upcoming()
+        ->with(['organizer', 'category'])
+        ->orderBy('start_date', 'asc')
+        ->take(3)
+        ->get();
     $categories = Category::all();
 
     $tabs = [

@@ -23,7 +23,18 @@ class EventController extends Controller
       $filters['city'] = $request->input('city');
     }
 
-    $events = Event::getPublishedEvents(10, $filters);
+    // Temporarily bypass caching for debugging
+    $query = Event::published()->with(['organizer', 'category']);
+
+    if (isset($filters['search'])) {
+      $query->search($filters['search']);
+    }
+
+    if (isset($filters['city'])) {
+      $query->inCity($filters['city']);
+    }
+
+    $events = $query->orderBy('start_date', 'asc')->paginate(10);
     $cities = Event::getAvailableCities();
 
     return view('events.index', compact('events', 'cities'));
