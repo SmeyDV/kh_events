@@ -2,21 +2,9 @@
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-end h-16">
-            <!-- Navigation Links -->
+            <!-- Settings Dropdown - Only Profile and Logout -->
             <div class="hidden sm:flex items-center space-x-6">
                 @auth
-                @if(strtolower(Auth::user()->role->slug) === 'organizer')
-                <x-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                <x-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
-                    {{ __('My Events') }}
-                </x-nav-link>
-                <x-nav-link :href="route('organizer.events.create')" :active="request()->routeIs('organizer.events.create')">
-                    {{ __('Create Event') }}
-                </x-nav-link>
-                @endif
-
                 <!-- Settings Dropdown -->
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     <x-dropdown align="right" width="48">
@@ -62,22 +50,6 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            @auth
-            @if(strtolower(Auth::user()->role->slug) === 'organizer')
-            <x-responsive-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('organizer.my-events')" :active="request()->routeIs('organizer.my-events')">
-                {{ __('My Events') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('organizer.events.create')" :active="request()->routeIs('organizer.events.create')">
-                {{ __('Create Event') }}
-            </x-responsive-nav-link>
-            @endif
-            @endauth
-        </div>
-
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             @auth
