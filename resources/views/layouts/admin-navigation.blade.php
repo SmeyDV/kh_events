@@ -32,6 +32,8 @@
                             </form>
                         </x-slot>
                     </x-dropdown>
+
+                    @include('layouts.partials.theme-toggle-button')
                 </div>
                 @endauth
             </div>
