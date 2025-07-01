@@ -11,6 +11,7 @@ use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\City;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AdminRegisterController;
 use Illuminate\Support\Facades\Route;
@@ -44,7 +45,7 @@ Route::get('/', function () {
         ],
     ];
 
-    $cities = config('app.kh_cities');
+    $cities = City::orderBy('name')->get();
 
     return view('welcome', compact('upcomingEvents', 'categories', 'tabs', 'organizerCta', 'cities'));
 })->name('home');

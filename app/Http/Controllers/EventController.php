@@ -19,19 +19,19 @@ class EventController extends Controller
       $filters['search'] = $request->input('search');
     }
 
-    if ($request->filled('city')) {
-      $filters['city'] = $request->input('city');
+    if ($request->filled('city_id')) {
+      $filters['city_id'] = $request->input('city_id');
     }
 
     // Temporarily bypass caching for debugging
-    $query = Event::published()->with(['organizer', 'category']);
+    $query = Event::published()->with(['organizer', 'category', 'city']);
 
     if (isset($filters['search'])) {
       $query->search($filters['search']);
     }
 
-    if (isset($filters['city'])) {
-      $query->inCity($filters['city']);
+    if (isset($filters['city_id'])) {
+      $query->inCity($filters['city_id']);
     }
 
     $events = $query->orderBy('start_date', 'asc')->paginate(10);

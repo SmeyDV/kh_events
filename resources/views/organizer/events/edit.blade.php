@@ -60,11 +60,11 @@
                         </div>
                         <!-- City -->
                         <div>
-                            <x-input-label for="city" :value="__('City')" />
-                            <select id="city" name="city" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                            <x-input-label for="city_id" :value="__('City')" />
+                            <select id="city_id" name="city_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
                                 <option value="">Select a city</option>
-                                @foreach(config('app.kh_cities') as $city)
-                                <option value="{{ $city }}" {{ old('city', $event->city) == $city ? 'selected' : '' }}>{{ $city }}</option>
+                                @foreach($cities as $city)
+                                <option value="{{ $city->id }}" {{ old('city_id', $event->city_id) == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -108,7 +108,7 @@
                                 </div>
                                 @endforeach
                             </div>
-                            <div class="relative border-dotted h-48 rounded-lg border-dashed border-2 border-blue-700 bg-gray-100 flex justify-center items-center mt-2">
+                            <div class="relative h-48 rounded-lg border-dashed border-2 border-blue-700 bg-gray-100 flex justify-center items-center mt-2">
                                 <div class="absolute">
                                     <div class="flex flex-col items-center">
                                         <i class="fa fa-folder-open fa-4x text-blue-700"></i>

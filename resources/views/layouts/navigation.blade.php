@@ -14,10 +14,10 @@
             <!-- Search Bar and City Dropdown -->
             <div class="hidden sm:flex flex-grow max-w-xl mx-auto items-center gap-2">
                 <form action="{{ route('events.index') }}" method="GET" class="w-full flex gap-2">
-                    <select name="city" onchange="this.form.submit()" class="rounded border-gray-300 dark:bg-gray-700 dark:text-gray-100">
+                    <select name="city_id" onchange="this.form.submit()" class="rounded border-gray-300 dark:bg-gray-700 dark:text-gray-100">
                         <option value="">All Cities</option>
                         @foreach($cities as $city)
-                        <option value="{{ $city }}" @if(request('city')==$city) selected @endif>{{ $city }}</option>
+                        <option value="{{ $city->id }}" @if(request('city_id')==$city->id) selected @endif>{{ $city->name }}</option>
                         @endforeach
                     </select>
                     <div class="relative flex-grow">

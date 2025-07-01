@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -121,34 +120,6 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
-    ],
-
-    'kh_cities' => [
-        'Phnom Penh',
-        'Banteay Meanchey',
-        'Battambang',
-        'Kampong Cham',
-        'Kampong Chhnang',
-        'Kampong Speu',
-        'Kampong Thom',
-        'Kampot',
-        'Kandal',
-        'Kep',
-        'Koh Kong',
-        'Kratié',
-        'Mondulkiri',
-        'Oddar Meanchey',
-        'Pailin',
-        'Preah Sihanouk',
-        'Preah Vihear',
-        'Prey Veng',
-        'Pursat',
-        'Ratanakiri',
-        'Siem Reap',
-        'Stung Treng',
-        'Svay Rieng',
-        'Takéo',
-        'Tboung Khmum',
-    ],
+    ]
 
 ];

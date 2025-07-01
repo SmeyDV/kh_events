@@ -63,9 +63,9 @@
 
   <script>
     let currentPage = 1;
-    let currentCity = '';
+    let currentCityId = '';
     let currentSearch = '';
-    const cities = @json(config('app.kh_cities', []));
+    const cities = @json($cities);
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
@@ -85,8 +85,8 @@
       const citySelect = document.getElementById('cityFilter');
       cities.forEach(city => {
         const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
+        option.value = city.id;
+        option.textContent = city.name;
         citySelect.appendChild(option);
       });
     }
@@ -99,7 +99,7 @@
 
         // Build API URL with filters
         let url = `/api/v1/events?page=${page}`;
-        if (currentCity) url += `&city=${encodeURIComponent(currentCity)}`;
+        if (currentCityId) url += `&city_id=${currentCityId}`;
         if (currentSearch) url += `&q=${encodeURIComponent(currentSearch)}`;
 
         const response = await fetch(url, {
@@ -202,7 +202,7 @@
                 </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">By ${event.organizer?.name || 'Unknown'}</p>
                 <p class="text-gray-600 dark:text-gray-400 mb-2">${formatDate(event.start_date)}</p>
-                <p class="text-gray-500 dark:text-gray-400 mb-2">${event.city}</p>
+                <p class="text-gray-500 dark:text-gray-400 mb-2">${event.city?.name || 'N/A'}</p>
                 <p class="text-gray-700 dark:text-gray-200">${truncateText(event.description, 100)}</p>
                 <div class="mt-4 flex justify-between items-center">
                   <span class="font-bold text-lg">${event.ticket_price > 0 ? '$' + parseFloat(event.ticket_price).toFixed(2) : 'Free'}</span>
@@ -249,7 +249,7 @@
 
     // Apply filters
     function applyFilters() {
-      currentCity = document.getElementById('cityFilter').value;
+      currentCityId = document.getElementById('cityFilter').value;
       currentSearch = document.getElementById('searchInput').value;
       currentPage = 1;
 
@@ -264,7 +264,7 @@
     function clearFilters() {
       document.getElementById('cityFilter').value = '';
       document.getElementById('searchInput').value = '';
-      currentCity = '';
+      currentCityId = '';
       currentSearch = '';
       currentPage = 1;
       loadEvents(1);

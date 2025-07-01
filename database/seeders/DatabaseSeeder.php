@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
+            CitySeeder::class,
             // EventSeeder::class, // Disabled - uncomment to enable
         ]);
     }

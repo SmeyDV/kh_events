@@ -19,7 +19,6 @@ class Event extends Model
         'title',
         'description',
         'venue',
-        'city',
         'start_date',
         'end_date',
         'capacity',
@@ -27,6 +26,7 @@ class Event extends Model
         'status',
         'organizer_id',
         'category_id',
+        'city_id',
     ];
 
     protected $casts = [
@@ -35,7 +35,7 @@ class Event extends Model
         'ticket_price' => 'decimal:2',
     ];
 
-    protected $with = ['organizer', 'category']; // Eager load by default
+    protected $with = ['organizer', 'category', 'city']; // Eager load by default
 
     /**
      * Boot the model and add event listeners
@@ -48,7 +48,7 @@ class Event extends Model
         static::saved(function ($event) {
             Cache::forget('events.upcoming');
             Cache::forget('events.published');
-            Cache::forget("events.city.{$event->city}");
+            Cache::forget("events.city.{$event->city_id}");
 
             // Clear all cached published events with different filters
             Cache::forget('events.cities');
@@ -65,7 +65,7 @@ class Event extends Model
         static::deleted(function ($event) {
             Cache::forget('events.upcoming');
             Cache::forget('events.published');
-            Cache::forget("events.city.{$event->city}");
+            Cache::forget("events.city.{$event->city_id}");
 
             // Clear all cached published events with different filters
             Cache::forget('events.cities');
@@ -86,6 +86,14 @@ class Event extends Model
     public function organizer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'organizer_id');
+    }
+
+    /**
+     * Get the city for the event.
+     */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
     }
 
     /**
@@ -168,9 +176,9 @@ class Event extends Model
     /**
      * Scope a query to only include events in a specific city.
      */
-    public function scopeInCity(Builder $query, string $city): Builder
+    public function scopeInCity(Builder $query, int $cityId): Builder
     {
-        return $query->where('city', $city);
+        return $query->where('city_id', $cityId);
     }
 
     /**
@@ -243,14 +251,14 @@ class Event extends Model
         $cacheKey = "events.published." . md5(serialize($filters));
 
         return Cache::remember($cacheKey, 300, function () use ($perPage, $filters) {
-            $query = static::published()->with(['organizer', 'category']);
+            $query = static::published()->with(['organizer', 'category', 'city']);
 
             if (isset($filters['search'])) {
                 $query->search($filters['search']);
             }
 
-            if (isset($filters['city'])) {
-                $query->inCity($filters['city']);
+            if (isset($filters['city_id'])) {
+                $query->inCity($filters['city_id']);
             }
 
             return $query->orderBy('start_date', 'asc')->paginate($perPage);
@@ -263,12 +271,7 @@ class Event extends Model
     public static function getAvailableCities()
     {
         return Cache::remember('events.cities', 3600, function () {
-            return static::published()
-                ->whereNotNull('city')
-                ->distinct()
-                ->pluck('city')
-                ->sort()
-                ->values();
+            return City::orderBy('name')->get();
         });
     }
 

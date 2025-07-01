@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\City;
 use App\Models\EventImage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -33,7 +34,8 @@ class EventController extends Controller
   public function create(): View
   {
     $categories = Category::all();
-    return view('organizer.events.create', compact('categories'));
+    $cities = City::all();
+    return view('organizer.events.create', compact('categories', 'cities'));
   }
 
   /**
@@ -47,7 +49,7 @@ class EventController extends Controller
       'start_date' => 'required|date|after:now',
       'end_date' => 'required|date|after:start_date',
       'venue' => 'required|string|max:255',
-      'city' => 'required|string|max:255',
+      'city_id' => 'required|exists:cities,id',
       'capacity' => 'required|integer|min:1',
       'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
       'images' => 'nullable|array',
@@ -99,7 +101,8 @@ class EventController extends Controller
     }
 
     $categories = Category::all();
-    return view('organizer.events.edit', compact('event', 'categories'));
+    $cities = City::all();
+    return view('organizer.events.edit', compact('event', 'categories', 'cities'));
   }
 
   /**
@@ -118,7 +121,7 @@ class EventController extends Controller
       'start_date' => 'required|date',
       'end_date' => 'required|date|after:start_date',
       'venue' => 'required|string|max:255',
-      'city' => 'required|string|max:255',
+      'city_id' => 'required|exists:cities,id',
       'capacity' => 'required|integer|min:1',
       'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
       'images' => 'nullable|array',
