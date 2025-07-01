@@ -11,8 +11,12 @@
         <div class="p-6 text-gray-900 dark:text-gray-100">
 
           <!-- Event Image -->
-          @if($event->image_path)
-          <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}" class="w-full h-64 object-cover rounded-t-lg mb-4">
+          @if($event->images->isNotEmpty())
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+            @foreach($event->images as $image)
+            <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover rounded-lg">
+            @endforeach
+          </div>
           @endif
 
           <h3 class="text-3xl font-bold mb-2">{{ $event->title }}</h3>

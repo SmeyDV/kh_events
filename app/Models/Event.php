@@ -25,7 +25,6 @@ class Event extends Model
         'capacity',
         'ticket_price',
         'status',
-        'image_path',
         'organizer_id',
         'category_id',
     ];
@@ -95,6 +94,14 @@ class Event extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Get the images for the event.
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(EventImage::class);
     }
 
     /**

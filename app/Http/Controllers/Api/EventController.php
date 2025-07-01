@@ -16,12 +16,25 @@ class EventController extends Controller
     /**
      * Display a listing of all events (public).
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $events = Event::with(['category', 'organizer:id,name'])
-            ->where('status', 'published')
-            ->latest()
-            ->paginate(10);
+        $query = Event::with(['category', 'organizer:id,name', 'images'])
+            ->where('status', 'published');
+
+        // Filtering by city
+        if ($request->has('city') && $request->city != '') {
+            $query->where('city', $request->city);
+        }
+
+        // Searching by keyword
+        if ($request->has('q') && $request->q != '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->q . '%')
+                    ->orWhere('description', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        $events = $query->latest()->paginate(10);
 
         return response()->json([
             'success' => true,
@@ -93,7 +106,7 @@ class EventController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $event = Event::with(['category', 'organizer:id,name'])
+        $event = Event::with(['category', 'organizer:id,name', 'images'])
             ->where('status', 'published')
             ->find($id);
 
@@ -207,16 +220,19 @@ class EventController extends Controller
             ], 400);
         }
 
-        // Delete image if exists
-        if ($event->image_path) {
-            Storage::disk('public')->delete($event->image_path);
+        // Delete associated images from storage
+        if ($event->images) {
+            foreach ($event->images as $image) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+            // Images will be deleted from db by cascade
         }
 
         $event->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Event deleted successfully'
+            'message' => 'Event and associated images deleted successfully'
         ]);
     }
 
@@ -266,7 +282,7 @@ class EventController extends Controller
      */
     public function byCategory(string $categoryId): JsonResponse
     {
-        $events = Event::with(['category', 'organizer:id,name'])
+        $events = Event::with(['category', 'organizer:id,name', 'images'])
             ->where('category_id', $categoryId)
             ->where('status', 'published')
             ->latest()
@@ -283,7 +299,7 @@ class EventController extends Controller
      */
     public function byCity(string $city): JsonResponse
     {
-        $events = Event::with(['category', 'organizer:id,name'])
+        $events = Event::with(['category', 'organizer:id,name', 'images'])
             ->where('city', $city)
             ->where('status', 'published')
             ->latest()
@@ -296,19 +312,23 @@ class EventController extends Controller
     }
 
     /**
-     * Search events.
+     * Search for events (public).
      */
     public function search(Request $request): JsonResponse
     {
-        $query = $request->get('q');
+        $query = $request->input('q');
 
-        $events = Event::with(['category', 'organizer:id,name'])
+        if (!$query) {
+            return $this->index($request); // Return paginated results if no query
+        }
+
+        $events = Event::with(['category', 'organizer:id,name', 'images'])
             ->where('status', 'published')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                     ->orWhere('description', 'like', "%{$query}%")
-                    ->orWhere('venue', 'like', "%{$query}%")
-                    ->orWhere('city', 'like', "%{$query}%");
+                    ->orWhere('city', 'like', "%{$query}%")
+                    ->orWhere('venue', 'like', "%{$query}%");
             })
             ->latest()
             ->paginate(10);

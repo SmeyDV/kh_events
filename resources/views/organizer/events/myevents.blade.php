@@ -1,13 +1,13 @@
 <x-organizer-layout>
-   
-        <div class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl mx-4 sm:mx-6 lg:mx-8 mt-4">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 class="text-3xl font-bold tracking-tight">
-                    {{ __('My Events') }}
-                </h2>
-                <p class="mt-2 text-blue-100">Manage and organize your events with ease</p>
-            </div>
+
+    <div class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl mx-4 sm:mx-6 lg:mx-8 mt-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h2 class="text-3xl font-bold tracking-tight">
+                {{ __('My Events') }}
+            </h2>
+            <p class="mt-2 text-blue-100">Manage and organize your events with ease</p>
         </div>
+    </div>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(session('success'))
@@ -42,7 +42,7 @@
                 <div class="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden shadow-md rounded-xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <!-- Event Image with Overlay -->
                     <div class="relative overflow-hidden">
-                        <img src="{{ $event->image_path ? Storage::url($event->image_path) : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' }}"
+                        <img src="{{ $event->images->isNotEmpty() ? Storage::url($event->images->first()->image_path) : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' }}"
                             alt="{{ $event->title }}"
                             class="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-110">
 

@@ -97,15 +97,27 @@
 
                         <!-- Image Upload -->
                         <div>
-                            <x-input-label for="image" :value="__('Update Event Poster / Image')" />
-                            @if($event->image_path)
-                            <div class="my-2">
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Current Image:</p>
-                                <img src="{{ Storage::url($event->image_path) }}" alt="Current Event Image" class="rounded-md w-48 h-auto mt-1">
+                            <x-input-label for="images" :value="__('Event Images')" />
+                            <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                @foreach($event->images as $image)
+                                <div class="relative group">
+                                    <img src="{{ Storage::url($image->image_path) }}" alt="Event Image" class="rounded-md w-full h-24 object-cover">
+                                    <div class="absolute top-0 right-0">
+                                        <button type="button" class="p-1 bg-red-500 text-white rounded-full opacity-75 group-hover:opacity-100">&times;</button>
+                                    </div>
+                                </div>
+                                @endforeach
                             </div>
-                            @endif
-                            <input id="image" class="block mt-1 w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none" type="file" name="image">
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload a new image to replace the current one.</p>
+                            <div class="relative border-dotted h-48 rounded-lg border-dashed border-2 border-blue-700 bg-gray-100 flex justify-center items-center mt-2">
+                                <div class="absolute">
+                                    <div class="flex flex-col items-center">
+                                        <i class="fa fa-folder-open fa-4x text-blue-700"></i>
+                                        <span class="block text-gray-400 font-normal">Attach your files here</span>
+                                    </div>
+                                </div>
+                                <input type="file" class="h-full w-full opacity-0" name="images[]" multiple>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload one or more new images.</p>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">

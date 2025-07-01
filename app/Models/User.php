@@ -36,6 +36,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the events for the user.
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class, 'organizer_id');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -54,14 +62,6 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
-    }
-
-    /**
-     * Get the events for the user (as organizer).
-     */
-    public function events(): HasMany
-    {
-        return $this->hasMany(Event::class, 'organizer_id');
     }
 
     /**

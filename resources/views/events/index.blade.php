@@ -184,30 +184,36 @@
         return;
       }
 
-      grid.innerHTML = events.map(event => `
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-          <a href="/events/${event.id}">
-            <img src="${event.image_path ? '/storage/' + event.image_path : 'https://via.placeholder.com/300x200'}" 
-                 alt="${event.title}" 
-                 class="w-full h-48 object-cover">
-          </a>
-          <div class="p-4">
-            <h2 class="text-xl font-bold mb-2">
-              <a href="/events/${event.id}" class="hover:text-blue-600">${event.title}</a>
-            </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">By ${event.organizer?.name || 'Unknown'}</p>
-            <p class="text-gray-600 dark:text-gray-400 mb-2">${formatDate(event.start_date)}</p>
-            <p class="text-gray-500 dark:text-gray-400 mb-2">${event.city}</p>
-            <p class="text-gray-700 dark:text-gray-200">${truncateText(event.description, 100)}</p>
-            <div class="mt-4 flex justify-between items-center">
-              <span class="font-bold text-lg">${event.ticket_price > 0 ? '$' + parseFloat(event.ticket_price).toFixed(2) : 'Free'}</span>
-              <a href="/events/${event.id}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                View Details
+      grid.innerHTML = events.map(event => {
+        const imageUrl = event.images && event.images.length > 0 ?
+          `/storage/${event.images[0].image_path}` :
+          'https://via.placeholder.com/300x200';
+
+        return `
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+              <a href="/events/${event.id}">
+                <img src="${imageUrl}" 
+                     alt="${event.title}" 
+                     class="w-full h-48 object-cover">
               </a>
+              <div class="p-4">
+                <h2 class="text-xl font-bold mb-2">
+                  <a href="/events/${event.id}" class="hover:text-blue-600">${event.title}</a>
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">By ${event.organizer?.name || 'Unknown'}</p>
+                <p class="text-gray-600 dark:text-gray-400 mb-2">${formatDate(event.start_date)}</p>
+                <p class="text-gray-500 dark:text-gray-400 mb-2">${event.city}</p>
+                <p class="text-gray-700 dark:text-gray-200">${truncateText(event.description, 100)}</p>
+                <div class="mt-4 flex justify-between items-center">
+                  <span class="font-bold text-lg">${event.ticket_price > 0 ? '$' + parseFloat(event.ticket_price).toFixed(2) : 'Free'}</span>
+                  <a href="/events/${event.id}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    View Details
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `).join('');
+          `;
+      }).join('');
     }
 
     // Display pagination

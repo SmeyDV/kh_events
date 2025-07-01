@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\EventImage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,18 +50,22 @@ class EventController extends Controller
       'city' => 'required|string|max:255',
       'capacity' => 'required|integer|min:1',
       'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
-      'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      'images' => 'nullable|array',
+      'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
       'category_id' => 'required|exists:categories,id',
     ]);
 
     $validated['organizer_id'] = Auth::id();
     $validated['status'] = 'draft';
 
-    if ($request->hasFile('image')) {
-      $validated['image_path'] = $request->file('image')->store('event_images', 'public');
-    }
+    $event = Event::create($validated);
 
-    Event::create($validated);
+    if ($request->hasFile('images')) {
+      foreach ($request->file('images') as $image) {
+        $path = $image->store('event_images', 'public');
+        $event->images()->create(['image_path' => $path]);
+      }
+    }
 
     return redirect()
       ->route('organizer.my-events')
@@ -116,19 +121,19 @@ class EventController extends Controller
       'city' => 'required|string|max:255',
       'capacity' => 'required|integer|min:1',
       'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
-      'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      'images' => 'nullable|array',
+      'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
       'category_id' => 'required|exists:categories,id',
     ]);
 
-    if ($request->hasFile('image')) {
-      // Delete old image if exists
-      if ($event->image_path) {
-        Storage::disk('public')->delete($event->image_path);
-      }
-      $validated['image_path'] = $request->file('image')->store('event_images', 'public');
-    }
-
     $event->update($validated);
+
+    if ($request->hasFile('images')) {
+      foreach ($request->file('images') as $image) {
+        $path = $image->store('event_images', 'public');
+        $event->images()->create(['image_path' => $path]);
+      }
+    }
 
     return redirect()
       ->route('organizer.my-events')
@@ -152,9 +157,9 @@ class EventController extends Controller
         ->with('error', 'Cannot delete event with existing bookings.');
     }
 
-    // Delete image if exists
-    if ($event->image_path) {
-      Storage::disk('public')->delete($event->image_path);
+    // Delete images from storage
+    foreach ($event->images as $image) {
+      Storage::disk('public')->delete($image->image_path);
     }
 
     $event->delete();

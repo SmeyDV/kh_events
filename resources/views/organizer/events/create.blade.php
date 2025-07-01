@@ -132,10 +132,18 @@
 
                                     <!-- Image Upload -->
                                     <div>
-                                        <x-input-label for="image" :value="__('Event Poster / Image')" />
-                                        <input id="image" class="block mt-1 w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none" type="file" name="image">
-                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB.</p>
-                                        <div class="text-red-500 text-sm mt-1 hidden" id="image-error"></div>
+                                        <x-input-label for="images" :value="__('Event Images')" />
+                                        <div class="relative border-dotted h-48 rounded-lg border-dashed border-2 border-blue-700 bg-gray-100 flex justify-center items-center mt-2">
+                                            <div class="absolute">
+                                                <div class="flex flex-col items-center">
+                                                    <i class="fa fa-folder-open fa-4x text-blue-700"></i>
+                                                    <span class="block text-gray-400 font-normal">Attach your files here</span>
+                                                </div>
+                                            </div>
+                                            <input type="file" class="h-full w-full opacity-0" name="images[]" multiple>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB each.</p>
+                                        <div class="text-red-500 text-sm mt-1 hidden" id="images-error"></div>
                                     </div>
                                 </div>
                             </div>
