@@ -21,7 +21,7 @@ Route::get('/', function () {
     // Temporarily bypass caching for debugging
     $upcomingEvents = Event::published()
         ->upcoming()
-        ->with(['organizer', 'category'])
+        ->with(['organizer', 'category', 'images'])
         ->orderBy('start_date', 'asc')
         ->take(3)
         ->get();

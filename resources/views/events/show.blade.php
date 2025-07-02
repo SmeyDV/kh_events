@@ -36,7 +36,7 @@
             <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Event Details</h2>
             <div class="text-gray-700 dark:text-gray-300 space-y-2">
               <p><span class="font-semibold">Date:</span> {{ $event->start_date->format('F j, Y, g:i a') }} - {{ $event->end_date->format('F j, Y, g:i a') }}</p>
-              <p><span class="font-semibold">Venue:</span> {{ $event->venue }}, {{ $event->city }}</p>
+              <p><span class="font-semibold">Venue:</span> {{ $event->venue }}, {{ $event->city->name }}</p>
               <p><span class="font-semibold">Category:</span> {{ $event->category->name }}</p>
             </div>
           </div>

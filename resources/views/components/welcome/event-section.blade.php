@@ -9,7 +9,7 @@
       <div class="bg-white dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden shadow-2xl rounded-2xl transform hover:-translate-y-2 transition-transform duration-300 ease-in-out group">
         <a href="{{ route('events.show', $event) }}" class="block">
           <div class="overflow-hidden">
-            <img src="{{ $event->image_path ? Storage::url($event->image_path) : 'https://placehold.co/600x400/1e293b/ffffff?text=Event' }}" alt="{{ $event->title }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500">
+            <img src="{{ $event->images->isNotEmpty() ? Storage::url($event->images->first()->image_path) : 'https://placehold.co/600x400/1e293b/ffffff?text=Event' }}" alt="{{ $event->title }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500">
           </div>
           <div class="p-6">
             <p class="text-sm text-red-500 dark:text-red-400 font-bold">{{ $event->start_date->format('D, M d, Y - h:i A') }}</p>
