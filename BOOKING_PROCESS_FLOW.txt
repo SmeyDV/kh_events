@@ -1,0 +1,288 @@
+================================================================================
+                           BOOKING PROCESS FLOW DIAGRAM
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER JOURNEY                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    [User] → [Browse Events] → [Select Event] → [Book Tickets] → [Manage Bookings]
+                   ↓               ↓               ↓               ↓
+              /events        /events/{id}    /events/{id}/book  /bookings
+
+
+================================================================================
+                              DETAILED FLOW
+================================================================================
+
+1. EVENT DISCOVERY
+   ┌─────────────────┐
+   │ User visits     │
+   │ /events         │ → Lists all published events
+   │ (EventController│   - Published status
+   │ ::index)        │   - Future dates only
+   └─────────────────┘   - Available for booking
+
+2. EVENT SELECTION
+   ┌─────────────────┐
+   │ User clicks     │
+   │ /events/{event} │ → Shows event details
+   │ (EventController│   - Event information
+   │ ::show)         │   - "Book Now" button
+   └─────────────────┘   - Availability check
+
+3. BOOKING FORM
+   ┌─────────────────┐
+   │ User clicks     │
+   │ "Book Now"      │ → GET /events/{event}/book
+   │                 │
+   │ BookingController::create()
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ VALIDATION      │
+   │ - isAvailable   │ → Event must be:
+   │   ForBooking()  │   ✓ Published
+   │                 │   ✓ Not cancelled
+   │                 │   ✓ Not sold out
+   │                 │   ✓ Future date
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ SHOW FORM       │
+   │ - Event details │ → bookings/create.blade.php
+   │ - Quantity      │   - Event info display
+   │   selector      │   - Ticket quantity (1-10)
+   │ - Price calc    │   - Total price calculation
+   └─────────────────┘
+
+4. BOOKING SUBMISSION
+   ┌─────────────────┐
+   │ User submits    │
+   │ form            │ → POST /events/{event}/book
+   │                 │
+   │ BookingController::store()
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ PRE-VALIDATION  │
+   │ - Available?    │ → Double-check availability
+   │ - Quantity      │   - Min: 1, Max: 10
+   │   validation    │   - Required integer
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ DATABASE        │
+   │ TRANSACTION     │ → DB::beginTransaction()
+   │ START           │
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ CAPACITY CHECK  │
+   │ - Remaining     │ → if (capacity && remaining < quantity)
+   │   tickets       │   → ROLLBACK & ERROR
+   │ - Atomic check  │   else → PROCEED
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ CREATE BOOKING  │
+   │ - user_id       │ → Booking record created:
+   │ - event_id      │   - quantity: user input
+   │ - quantity      │   - total_amount: price × quantity
+   │ - total_amount  │   - status: 'confirmed'
+   │ - status        │   - booking_date: now()
+   │ - booking_date  │
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ COMMIT          │
+   │ TRANSACTION     │ → DB::commit()
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ REDIRECT TO     │
+   │ CONFIRMATION    │ → /bookings/{booking}
+   │                 │   with success message
+   └─────────────────┘
+
+5. BOOKING CONFIRMATION
+   ┌─────────────────┐
+   │ BookingController│
+   │ ::show()        │ → Shows booking details
+   │                 │
+   │ Authorization   │ → Policy check: user owns booking
+   │ check           │
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ DISPLAY TICKET  │
+   │ - Event details │ → bookings/show.blade.php
+   │ - Booking info  │   - E-ticket format
+   │ - QR code       │   - QR code for entry
+   │ - User info     │   - Booking reference
+   └─────────────────┘
+
+6. BOOKING MANAGEMENT
+   ┌─────────────────┐
+   │ User visits     │
+   │ /bookings       │ → BookingController::index()
+   │                 │
+   │ List all        │ → Shows all user bookings
+   │ bookings        │   - Paginated (10 per page)
+   │                 │   - Latest first
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ BOOKING ACTIONS │
+   │ - View Details  │ → /bookings/{booking}
+   │ - Cancel        │ → DELETE /bookings/{booking}
+   │   (if allowed)  │
+   └─────────────────┘
+
+7. BOOKING CANCELLATION
+   ┌─────────────────┐
+   │ User clicks     │
+   │ "Cancel"        │ → BookingController::cancel()
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ VALIDATION      │
+   │ - Authorization │ → Policy: user owns booking
+   │ - Time limit    │ → Must be >24hrs before event
+   │ - Status check  │ → Not already cancelled
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ UPDATE STATUS   │
+   │ - status =      │ → In transaction:
+   │   'cancelled'   │   - Update booking status
+   │                 │   - Commit changes
+   └─────────────────┘
+            ↓
+   ┌─────────────────┐
+   │ REDIRECT        │
+   │ - Back to       │ → /bookings with success
+   │   bookings list │   message
+   └─────────────────┘
+
+
+================================================================================
+                              ERROR HANDLING
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           VALIDATION FAILURES                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Event Not Available:
+├─ Not Published        → 403 Forbidden
+├─ Event Cancelled      → 403 Forbidden  
+├─ Sold Out            → 403 Forbidden
+└─ Past Date           → 403 Forbidden
+
+Booking Validation:
+├─ Invalid Quantity    → Back with error message
+├─ Insufficient Tickets → Back with error message
+└─ Database Error      → Rollback + error message
+
+Cancellation Errors:
+├─ Not Authorized      → 403 Forbidden
+├─ Too Close to Event  → Back with error message
+├─ Already Cancelled   → Back with error message
+└─ Database Error      → Rollback + error message
+
+
+================================================================================
+                              DATABASE OPERATIONS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TRANSACTION SAFETY                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Booking Creation:
+┌─ BEGIN TRANSACTION
+├─ Check remaining_tickets (atomic)
+├─ Create booking record
+├─ COMMIT TRANSACTION
+└─ Handle exceptions with ROLLBACK
+
+Booking Cancellation:
+┌─ BEGIN TRANSACTION  
+├─ Update booking status
+├─ COMMIT TRANSACTION
+└─ Handle exceptions with ROLLBACK
+
+
+================================================================================
+                              STATUS FLOW
+================================================================================
+
+Booking Status:
+    [pending] → [confirmed] → [cancelled]
+                          └─→ [refunded]
+
+Payment Status:
+    [pending] → [paid] → [refunded]
+             └─→ [failed]
+
+Current Implementation:
+- New bookings: status = 'confirmed', payment_status = 'pending'
+- Cancellation: status = 'cancelled' (payment_status unchanged)
+
+
+================================================================================
+                              VIEWS & ROUTES
+================================================================================
+
+Routes:
+├─ GET  /events/{event}/book    → bookings.create
+├─ POST /events/{event}/book    → bookings.store  
+├─ GET  /bookings               → bookings.index
+├─ GET  /bookings/{booking}     → bookings.show
+└─ DELETE /bookings/{booking}   → bookings.cancel
+
+Views:
+├─ bookings/create.blade.php    → Booking form
+├─ bookings/index.blade.php     → Booking list
+└─ bookings/show.blade.php      → E-ticket display
+
+
+================================================================================
+                              BUSINESS RULES
+================================================================================
+
+Booking Limits:
+├─ Max 10 tickets per booking
+├─ Min 1 ticket per booking
+└─ One booking per user per event (via unique constraint)
+
+Cancellation Rules:
+├─ Must be >24 hours before event
+├─ Only confirmed/pending bookings
+└─ User must own the booking
+
+Capacity Management:
+├─ Real-time capacity checking
+├─ Atomic operations prevent overbooking
+└─ Unlimited capacity if capacity = null
+
+
+================================================================================
+                              SECURITY MEASURES
+================================================================================
+
+Authorization:
+├─ BookingPolicy for access control
+├─ User can only view/modify own bookings
+└─ Admin can view all bookings
+
+Validation:
+├─ Input sanitization
+├─ Business rule enforcement
+└─ Database constraint validation
+
+Transaction Safety:
+├─ Atomic operations
+├─ Rollback on failures
+└─ Concurrent booking protection

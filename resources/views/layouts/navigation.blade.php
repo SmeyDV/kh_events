@@ -106,7 +106,7 @@
                 @else
                 <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
                 @if (Route::has('register'))
-                <a href="{{ route('register') }}" class="font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 transition-all duration-250 transform hover:scale-105">Register</a>
+                <a href="{{ route('register.select') }}" class="font-semibold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 transition-all duration-250 transform hover:scale-105">Register</a>
                 @endif
                 @include('layouts.partials.theme-toggle-button')
                 @endauth
@@ -175,7 +175,7 @@
             <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">
                 {{ __('Log in') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">
+            <x-responsive-nav-link :href="route('register.select')" :active="request()->routeIs('register.select')">
                 {{ __('Register') }}
             </x-responsive-nav-link>
         </div>

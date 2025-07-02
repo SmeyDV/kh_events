@@ -1,4 +1,10 @@
 <x-guest-layout>
+  <div class="mb-6 text-center">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      {{ __('Organizer Register') }}
+    </h2>
+  </div>
+
   <form method="POST" action="{{ route('register.organizer') }}">
     @csrf
 
@@ -39,12 +45,9 @@
       <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
     </div>
 
-    <div class="flex items-center justify-between mt-4">
+    <div class="flex items-center justify-end mt-4">
       <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
         {{ __('Already registered?') }}
-      </a>
-      <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-4" href="{{ route('register') }}">
-        {{ __('Register as User') }}
       </a>
 
       <x-primary-button class="ml-4">
