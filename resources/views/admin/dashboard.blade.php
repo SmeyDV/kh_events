@@ -30,27 +30,27 @@
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total Events</h3>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                           {{ $eventCount }}
+                            {{ $eventCount }}
                         </p>
                     </div>
                 </div>
 
-                 <!-- Total Organizers Card -->
+                <!-- Total Organizers Card -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total Organizers</h3>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                           {{ $organizerCount }}
+                            {{ $organizerCount }}
                         </p>
                     </div>
                 </div>
-                
-                <!-- Pending Events Card -->
+
+                <!-- Draft Events Card -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pending Events</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Draft Events</h3>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                           {{ $pendingEventCount }}
+                            {{ $pendingEventCount }}
                         </p>
                         <a href="{{ route('admin.events') }}" class="mt-4 inline-block text-blue-500 hover:underline">Review Events</a>
                     </div>

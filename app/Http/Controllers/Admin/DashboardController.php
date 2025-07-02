@@ -19,7 +19,7 @@ class DashboardController extends Controller
     $organizerCount = User::whereHas('role', function ($q) {
       $q->where('name', 'organizer');
     })->count();
-    $pendingEventCount = Event::where('status', 'pending')->count();
+    $pendingEventCount = Event::where('status', 'draft')->count();
 
     return view('admin.dashboard', compact('userCount', 'eventCount', 'organizerCount', 'pendingEventCount'));
   }
