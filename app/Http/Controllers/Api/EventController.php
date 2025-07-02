@@ -22,8 +22,8 @@ class EventController extends Controller
             ->where('status', 'published');
 
         // Filtering by city
-        if ($request->has('city') && $request->city != '') {
-            $query->where('city', $request->city);
+        if ($request->has('city_id') && $request->city_id != '') {
+            $query->where('city_id', $request->city_id);
         }
 
         // Searching by keyword
@@ -70,22 +70,35 @@ class EventController extends Controller
                 'start_date' => 'required|date|after:now',
                 'end_date' => 'required|date|after:start_date',
                 'venue' => 'required|string|max:255',
-                'city' => 'required|string|max:255',
+                'city_id' => 'required|exists:cities,id',
                 'capacity' => 'required|integer|min:1',
                 'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'images' => 'nullable|array',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'category_id' => 'required|exists:categories,id',
             ]);
 
             $validated['organizer_id'] = Auth::id();
             $validated['status'] = 'draft';
 
-            if ($request->hasFile('image')) {
-                $validated['image_path'] = $request->file('image')->store('event_images', 'public');
-            }
+            // Remove images from validated data as we'll handle them separately
+            $images = $validated['images'] ?? [];
+            unset($validated['images']);
 
             $event = Event::create($validated);
-            $event->load(['category', 'organizer:id,name']);
+
+            // Handle multiple image uploads
+            if (!empty($images)) {
+                foreach ($images as $image) {
+                    $imagePath = $image->store('event_images', 'public');
+                    $event->images()->create([
+                        'image_path' => $imagePath,
+                        'is_primary' => $event->images()->count() === 0 // First image is primary
+                    ]);
+                }
+            }
+
+            $event->load(['category', 'organizer:id,name', 'city', 'images']);
 
             return response()->json([
                 'success' => true,
@@ -166,7 +179,7 @@ class EventController extends Controller
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after:start_date',
                 'venue' => 'required|string|max:255',
-                'city' => 'required|string|max:255',
+                'city_id' => 'required|exists:cities,id',
                 'capacity' => 'required|integer|min:1',
                 'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -297,10 +310,10 @@ class EventController extends Controller
     /**
      * Get events by city.
      */
-    public function byCity(string $city): JsonResponse
+    public function byCity(string $cityId): JsonResponse
     {
         $events = Event::with(['category', 'organizer:id,name', 'images'])
-            ->where('city', $city)
+            ->where('city_id', $cityId)
             ->where('status', 'published')
             ->latest()
             ->paginate(10);
@@ -327,8 +340,10 @@ class EventController extends Controller
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                     ->orWhere('description', 'like', "%{$query}%")
-                    ->orWhere('city', 'like', "%{$query}%")
-                    ->orWhere('venue', 'like', "%{$query}%");
+                    ->orWhere('venue', 'like', "%{$query}%")
+                    ->orWhereHas('city', function ($cityQuery) use ($query) {
+                        $cityQuery->where('name', 'like', "%{$query}%");
+                    });
             })
             ->latest()
             ->paginate(10);
