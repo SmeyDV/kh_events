@@ -20,7 +20,13 @@ class CategorySeeder extends Seeder
             'Charity & Causes',
             'Hobbies',
             'Tech',
-            'Fashion'
+            'Fashion',
+            'Sports',
+            'Health & Wellness',
+            'Education',
+            'Arts & Culture',
+            'Business & Networking',
+            'Travel & Adventure',
         ];
 
         foreach ($categories as $name) {

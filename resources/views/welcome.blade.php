@@ -16,21 +16,23 @@
 </head>
 
 <body class="antialiased font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <div class="relative min-h-screen flex flex-col">
+    <div class="relative min-h-screen">
 
         @include('layouts.navigation')
 
         <x-welcome.hero-section />
 
-        <x-welcome.categories-section />
+        <div class="relative z-10 bg-white dark:bg-gray-900">
+            <x-welcome.categories-section :categories="$categories" />
 
-        <x-welcome.mini-navbar />
+            <x-welcome.mini-navbar :tabs="$tabs" />
 
-        <x-welcome.event-section :upcomingEvents="$upcomingEvents" />
+            <x-welcome.event-section :upcomingEvents="$upcomingEvents" />
 
-        <x-welcome.organizer-cta />
+            <x-welcome.organizer-cta />
 
-        <x-layout.footer />
+            <x-layout.footer />
+        </div>
 
     </div>
 </body>

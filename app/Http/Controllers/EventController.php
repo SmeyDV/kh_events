@@ -23,6 +23,10 @@ class EventController extends Controller
       $filters['city_id'] = $request->input('city_id');
     }
 
+    if ($request->filled('category_id')) {
+      $filters['category_id'] = $request->input('category_id');
+    }
+
     // Temporarily bypass caching for debugging
     $query = Event::published()->with(['organizer', 'category', 'city']);
 
@@ -34,10 +38,15 @@ class EventController extends Controller
       $query->inCity($filters['city_id']);
     }
 
+    if (isset($filters['category_id'])) {
+      $query->where('category_id', $filters['category_id']);
+    }
+
     $events = $query->orderBy('start_date', 'asc')->paginate(10);
     $cities = Event::getAvailableCities();
+    $categories = \App\Models\Category::all();
 
-    return view('events.index', compact('events', 'cities'));
+    return view('events.index', compact('events', 'cities', 'categories'));
   }
 
   /**

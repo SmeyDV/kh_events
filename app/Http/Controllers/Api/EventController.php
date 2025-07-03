@@ -26,6 +26,11 @@ class EventController extends Controller
             $query->where('city_id', $request->city_id);
         }
 
+        // Filtering by category
+        if ($request->has('category_id') && $request->category_id != '') {
+            $query->where('category_id', $request->category_id);
+        }
+
         // Searching by keyword
         if ($request->has('q') && $request->q != '') {
             $query->where(function ($q) use ($request) {

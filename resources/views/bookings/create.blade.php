@@ -20,8 +20,8 @@
             <div class="p-6">
               <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Event Details</h3>
 
-              @if ($event->image_path)
-              <img src="{{ Storage::url($event->image_path) }}" alt="{{ $event->title }}" class="w-full h-64 object-cover rounded-lg mb-6">
+              @if($event->images->isNotEmpty())
+              <img src="{{ Storage::url($event->images->first()->image_path) }}" alt="{{ $event->title }}" class="w-full h-64 object-cover rounded-lg mb-6">
               @endif
 
               <div class="space-y-4">
@@ -130,17 +130,23 @@
 
   <script>
     // Update total amount when quantity changes
-    document.getElementById('quantity').addEventListener('change', function() {
-      const quantity = parseInt(this.value);
+    document.addEventListener('DOMContentLoaded', function() {
+      const quantitySelect = document.getElementById('quantity');
       const pricePerTicket = {
-        {
-          $event - > ticket_price ?? 0
-        }
+        !!$event - > ticket_price ?? 0!!
       };
-      const total = quantity * pricePerTicket;
 
-      document.getElementById('quantity-display').textContent = quantity;
-      document.getElementById('total-amount').textContent = total > 0 ? '$' + total.toFixed(2) : 'Free';
+      function updateTotal() {
+        const quantity = parseInt(quantitySelect.value);
+        const total = quantity * pricePerTicket;
+
+        document.getElementById('quantity-display').textContent = quantity;
+        document.getElementById('total-amount').textContent = total > 0 ? '$' + total.toFixed(2) : 'Free';
+      }
+
+      quantitySelect.addEventListener('change', updateTotal);
+      // Set initial total
+      updateTotal();
     });
   </script>
 </x-app-layout>

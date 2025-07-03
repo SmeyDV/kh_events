@@ -23,18 +23,30 @@ Route::get('/', function () {
         ->upcoming()
         ->with(['organizer', 'category', 'images'])
         ->orderBy('start_date', 'asc')
-        ->take(3)
+        ->take(6)
         ->get();
     $categories = Category::all();
 
+    // Create dynamic tabs with categories from database
     $tabs = [
-        ['label' => 'All', 'active' => true],
-        ['label' => 'For you', 'active' => false],
-        ['label' => 'Online', 'active' => false],
-        ['label' => 'Today', 'active' => false],
-        ['label' => 'This weekend', 'active' => false],
-        ['label' => 'Free', 'active' => false],
+        ['label' => 'All', 'active' => true, 'type' => 'filter'],
+        ['label' => 'For you', 'active' => false, 'type' => 'filter'],
+        ['label' => 'Online', 'active' => false, 'type' => 'filter'],
+        ['label' => 'Today', 'active' => false, 'type' => 'filter'],
+        ['label' => 'This weekend', 'active' => false, 'type' => 'filter'],
+        ['label' => 'Free', 'active' => false, 'type' => 'filter'],
     ];
+
+    // Add categories to tabs
+    foreach ($categories as $category) {
+        $tabs[] = [
+            'label' => $category->name,
+            'active' => false,
+            'type' => 'category',
+            'slug' => $category->slug,
+            'id' => $category->id
+        ];
+    }
 
     $organizerCta = [
         'title' => 'Make your own event',
@@ -53,6 +65,10 @@ Route::get('/', function () {
 // Public event listing and detail pages
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+
+// Category pages
+Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/{category:slug}', [App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
 
 // --- AUTHENTICATED ROUTES ---
 Route::middleware(['auth', 'verified'])->group(function () {

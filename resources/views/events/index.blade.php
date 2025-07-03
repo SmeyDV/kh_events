@@ -36,6 +36,9 @@
                 <select id="cityFilter" class="rounded border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
                   <option value="">All Cities</option>
                 </select>
+                <select id="categoryFilter" class="rounded border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                  <option value="">All Categories</option>
+                </select>
                 <input type="search" id="searchInput" placeholder="Search events..." class="rounded border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" />
                 <button onclick="applyFilters()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                   Filter
@@ -64,12 +67,15 @@
   <script>
     let currentPage = 1;
     let currentCityId = '';
+    let currentCategoryId = '';
     let currentSearch = '';
     const cities = @json($cities);
+    const categories = @json($categories);
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
       populateCities();
+      populateCategories();
       loadEvents();
 
       // Add search on Enter key
@@ -91,6 +97,17 @@
       });
     }
 
+    // Populate categories dropdown
+    function populateCategories() {
+      const categorySelect = document.getElementById('categoryFilter');
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
+      });
+    }
+
     // Load events from API
     async function loadEvents(page = 1) {
       try {
@@ -100,6 +117,7 @@
         // Build API URL with filters
         let url = `/api/v1/events?page=${page}`;
         if (currentCityId) url += `&city_id=${currentCityId}`;
+        if (currentCategoryId) url += `&category_id=${currentCategoryId}`;
         if (currentSearch) url += `&q=${encodeURIComponent(currentSearch)}`;
 
         const response = await fetch(url, {
@@ -197,6 +215,11 @@
                      class="w-full h-48 object-cover">
               </a>
               <div class="p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded">
+                    ${event.category?.name || 'Uncategorized'}
+                  </span>
+                </div>
                 <h2 class="text-xl font-bold mb-2">
                   <a href="/events/${event.id}" class="hover:text-blue-600">${event.title}</a>
                 </h2>
@@ -250,6 +273,7 @@
     // Apply filters
     function applyFilters() {
       currentCityId = document.getElementById('cityFilter').value;
+      currentCategoryId = document.getElementById('categoryFilter').value;
       currentSearch = document.getElementById('searchInput').value;
       currentPage = 1;
 
@@ -263,8 +287,10 @@
     // Clear filters
     function clearFilters() {
       document.getElementById('cityFilter').value = '';
+      document.getElementById('categoryFilter').value = '';
       document.getElementById('searchInput').value = '';
       currentCityId = '';
+      currentCategoryId = '';
       currentSearch = '';
       currentPage = 1;
       loadEvents(1);

@@ -14,9 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            OrganizerSeeder::class,
             CategorySeeder::class,
             CitySeeder::class,
-            // EventSeeder::class, // Disabled - uncomment to enable
+            EventSeeder::class,
         ]);
     }
 }
