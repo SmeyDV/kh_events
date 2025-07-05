@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Public API routes (no authentication required)
 Route::prefix('v1')->group(function () {
 
+  // API Authentication routes
+  Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+  });
+
   // Public event routes
   Route::prefix('events')->group(function () {
     Route::get('/', [EventController::class, 'index']); // Get all events
@@ -32,8 +39,14 @@ Route::prefix('v1')->group(function () {
   });
 });
 
-// Protected API routes (authentication required)
-Route::prefix('v1')->middleware(['web', 'auth'])->group(function () {
+// Protected API routes (Sanctum token authentication)
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+
+  // Auth user routes
+  Route::prefix('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
+  });
 
   // Organizer routes (role-based access)
   Route::prefix('organizer')->middleware('role:organizer')->group(function () {
