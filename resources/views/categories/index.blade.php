@@ -1,15 +1,5 @@
 <x-main-layout>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Header Section -->
-    <div class="bg-gradient-to-r from-red-600 to-red-800 text-white py-20 pt-32">
-      <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-6xl font-black mb-6">Event Categories</h1>
-        <p class="text-xl md:text-2xl text-red-100 max-w-3xl mx-auto">
-          Discover amazing events across all categories in Cambodia
-        </p>
-      </div>
-    </div>
-
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
     <!-- Categories Grid -->
     <div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -56,9 +46,9 @@
               </svg>
             </div>
           </div>
+        </a>
+        @endforeach
       </div>
-      @endforeach
     </div>
-  </div>
   </div>
 </x-main-layout>

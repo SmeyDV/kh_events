@@ -25,6 +25,16 @@ Route::get('/', function () {
         ->orderBy('start_date', 'asc')
         ->take(6)
         ->get();
+
+    // Get additional events for "Other events you may like" section
+    $otherEvents = Event::published()
+        ->upcoming()
+        ->with(['organizer', 'category', 'images'])
+        ->whereNotIn('id', $upcomingEvents->pluck('id'))
+        ->orderBy('start_date', 'asc')
+        ->take(8)
+        ->get();
+
     $categories = Category::all();
 
     // Create dynamic tabs with categories from database
@@ -59,7 +69,7 @@ Route::get('/', function () {
 
     $cities = City::orderBy('name')->get();
 
-    return view('welcome', compact('upcomingEvents', 'categories', 'tabs', 'organizerCta', 'cities'));
+    return view('welcome', compact('upcomingEvents', 'otherEvents', 'categories', 'tabs', 'organizerCta', 'cities'));
 })->name('home');
 
 // Public event listing and detail pages

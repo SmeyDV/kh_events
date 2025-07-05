@@ -9,6 +9,8 @@
 
             <x-welcome.event-section :upcomingEvents="$upcomingEvents" />
 
+            <x-welcome.other-events-section :otherEvents="$otherEvents" />
+
             <x-welcome.organizer-cta />
         </div>
     </div>
