@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-main-layout>
   <x-slot name="header">
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
       {{ __('Events') }}
@@ -328,4 +328,4 @@
       return text.substring(0, limit) + '...';
     }
   </script>
-</x-app-layout>
+</x-main-layout>
