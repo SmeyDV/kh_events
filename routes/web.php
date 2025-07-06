@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\EventController as AdminEventController;
-use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboardController;
 use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
@@ -13,7 +10,6 @@ use App\Models\Event;
 use App\Models\Category;
 use App\Models\City;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\AdminRegisterController;
 use Illuminate\Support\Facades\Route;
 
 // --- PUBLIC ROUTES ---
@@ -115,32 +111,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/events/{event}', [OrganizerEventController::class, 'update'])->name('events.update');
         Route::delete('/events/{event}', [OrganizerEventController::class, 'destroy'])->name('events.destroy');
     });
-
-    // --- ADMIN ROUTES ---
-    Route::prefix('admin')->name('admin.')->middleware(['role:admin'])->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'admin'])->name('dashboard');
-        Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
-
-        // Admin Profile
-        Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [AdminProfileController::class, 'destroy'])->name('profile.destroy');
-
-        // Event Management
-        Route::get('/events', [AdminEventController::class, 'index'])->name('events');
-        Route::get('/events/{event}', [AdminEventController::class, 'show'])->name('events.show');
-        Route::post('/events/{event}/approve', [AdminEventController::class, 'approve'])->name('events.approve');
-        Route::post('/events/{event}/reject', [AdminEventController::class, 'reject'])->name('events.reject');
-    });
-
-    // Routes accessible by both admin and organizer
-    Route::middleware(['role:admin,organizer'])->group(function () {
-        Route::get('/reports', [AdminDashboardController::class, 'reports'])->name('reports');
-    });
 });
-
-// Secret admin registration form
-Route::get('/register-admin-SECRET123', [AdminRegisterController::class, 'showForm'])->name('register.admin.secret');
-Route::post('/register-admin-SECRET123', [AdminRegisterController::class, 'register'])->name('register.admin.secret.post');
 
 require __DIR__ . '/auth.php';

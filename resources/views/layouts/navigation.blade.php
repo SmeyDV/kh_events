@@ -37,18 +37,12 @@
                 @auth
                 @php
                 $profileRoute = 'profile.edit'; // Default for user
-                if (Auth::user()->role->name === 'admin') {
-                $profileRoute = 'admin.profile.edit';
-                } elseif (Auth::user()->role->name === 'organizer') {
+                if (Auth::user()->role->name === 'organizer') {
                 $profileRoute = 'organizer.profile.edit';
                 }
                 @endphp
 
-                @if(strtolower(Auth::user()->role->name) === 'admin')
-                <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                @elseif(strtolower(Auth::user()->role->name) === 'organizer')
+                @if(strtolower(Auth::user()->role->name) === 'organizer')
                 <x-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
                     {{ __('Dashboard') }}
                 </x-nav-link>
@@ -128,11 +122,7 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         @auth
         <div class="pt-2 pb-3 space-y-1">
-            @if(strtolower(Auth::user()->role->name) === 'admin')
-            <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            @elseif(strtolower(Auth::user()->role->name) === 'organizer')
+            @if(strtolower(Auth::user()->role->name) === 'organizer')
             <x-responsive-nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>

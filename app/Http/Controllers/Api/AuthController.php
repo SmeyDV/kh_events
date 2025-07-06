@@ -128,6 +128,46 @@ class AuthController extends Controller
   }
 
   /**
+   * Admin login specifically for external dashboard
+   */
+  public function adminLogin(Request $request)
+  {
+    $request->validate([
+      'email' => 'required|email',
+      'password' => 'required',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+      throw ValidationException::withMessages([
+        'email' => ['The provided credentials are incorrect.'],
+      ]);
+    }
+
+    // Check if user is admin
+    if ($user->role->slug !== 'admin') {
+      throw ValidationException::withMessages([
+        'email' => ['Access denied. Admin privileges required.'],
+      ]);
+    }
+
+    $token = $user->createToken('Admin Dashboard Access', $this->getTokenAbilities($user->role->slug));
+
+    return response()->json([
+      'message' => 'Admin login successful',
+      'access_token' => $token->plainTextToken,
+      'token_type' => 'Bearer',
+      'user' => [
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'role' => $user->role->slug,
+      ]
+    ]);
+  }
+
+  /**
    * Get token abilities based on user role
    */
   private function getTokenAbilities(string $role): array

@@ -21,7 +21,6 @@ return new class extends Migration
 
         // Insert default roles
         DB::table('roles')->insert([
-            ['name' => 'Administrator', 'slug' => 'admin', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'User', 'slug' => 'user', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Organizer', 'slug' => 'organizer', 'created_at' => now(), 'updated_at' => now()],
         ]);

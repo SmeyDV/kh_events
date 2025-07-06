@@ -16,20 +16,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Get existing roles
-        $adminRole = Role::where('slug', 'admin')->first();
         $organizerRole = Role::where('slug', 'organizer')->first();
         $userRole = Role::where('slug', 'user')->first();
-
-        // Create admin user
-        User::firstOrCreate([
-            'email' => 'admin@khevents.com'
-        ], [
-            'name' => 'Admin User',
-            'email' => 'admin@khevents.com',
-            'password' => Hash::make('password'),
-            'role_id' => $adminRole->id,
-            'email_verified_at' => now(),   
-        ]);
 
         // Create organizer user
         User::firstOrCreate([
