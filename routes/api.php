@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +41,26 @@ Route::prefix('v1')->group(function () {
     Route::get('/city/{city}', [EventController::class, 'byCity']); // Events by city
     Route::get('/search', [EventController::class, 'search']); // Search events
   });
+
+  // Public endpoint to get all users with role 'user'
+  Route::get('/users', function () {
+    return \App\Models\User::where('role', 'user')->get();
+  });
+
+  // Public endpoint to get all categories (RESTful, via CategoryController)
+  Route::get('/categories', [CategoryController::class, 'index']);
+
+  // Public endpoint to get all cities (RESTful, via CityController)
+  Route::get('/cities', [CityController::class, 'index']);
+
+  // Public endpoints for tickets (RESTful)
+  Route::apiResource('tickets', \App\Http\Controllers\Api\TicketController::class)->only(['index', 'show']);
+
+  // Public endpoint to create a booking
+  Route::post('/bookings', [App\Http\Controllers\Api\BookingController::class, 'store']);
+  Route::post('/payments', [App\Http\Controllers\Api\PaymentController::class, 'store']);
+  Route::get('/payments/{id}', [App\Http\Controllers\Api\PaymentController::class, 'show']);
+  Route::get('/payments', [App\Http\Controllers\Api\PaymentController::class, 'index']);
 });
 
 // Protected API routes (Sanctum token authentication)

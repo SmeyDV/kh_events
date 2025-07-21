@@ -38,6 +38,9 @@
               <div>
                 <p class="text-sm text-gray-500 text-right">Quantity</p>
                 <p class="font-bold text-right">{{ $booking->quantity }} {{ Str::plural('Ticket', $booking->quantity) }}</p>
+                @if($booking->ticket)
+                <p class="text-xs text-gray-500 text-right mt-1">Type: <span class="capitalize">{{ str_replace('_', ' ', $booking->ticket->type) }}</span> | Price: ${{ number_format($booking->ticket->price, 2) }}</p>
+                @endif
               </div>
             </div>
 

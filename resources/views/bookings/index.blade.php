@@ -54,15 +54,15 @@
               <p>{{ $booking->event->start_date->format('M d, Y g:i A') }}</p>
               <p>{{ $booking->event->venue }}</p>
               <p>{{ $booking->quantity }} {{ Str::plural('ticket', $booking->quantity) }}</p>
+              @if($booking->ticket)
+              <p class="text-xs text-gray-500 dark:text-gray-400">Type: <span class="capitalize">{{ str_replace('_', ' ', $booking->ticket->type) }}</span> | Price: ${{ number_format($booking->ticket->price, 2) }}</p>
+              @endif
               <p class="font-semibold text-gray-900 dark:text-white">
                 Total: ${{ number_format($booking->total_amount, 2) }}
               </p>
             </div>
 
             <div class="flex items-center justify-between mb-4">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $booking->status_badge_color }}">
-                {{ ucfirst($booking->status) }}
-              </span>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $booking->payment_status_badge_color }}">
                 {{ ucfirst($booking->payment_status) }}
               </span>

@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\EventImage;
+use App\Models\Ticket;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -51,14 +52,23 @@ class EventController extends Controller
       'venue' => 'required|string|max:255',
       'city_id' => 'required|exists:cities,id',
       'capacity' => 'required|integer|min:1',
-      'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
       'images' => 'nullable|array',
       'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
       'category_id' => 'required|exists:categories,id',
+      'ticket_types' => 'required|array',
+      'ticket_types.normal.price' => 'required|numeric|min:0',
+      'ticket_types.normal.quantity' => 'required|integer|min:0',
+      'ticket_types.early_birds.price' => 'required|numeric|min:0',
+      'ticket_types.early_birds.quantity' => 'required|integer|min:0',
+      'ticket_types.premium.price' => 'required|numeric|min:0',
+      'ticket_types.premium.quantity' => 'required|integer|min:0',
     ]);
 
     $validated['organizer_id'] = Auth::id();
     $validated['status'] = 'draft';
+
+    $ticketTypes = $validated['ticket_types'];
+    unset($validated['ticket_types']);
 
     $event = Event::create($validated);
 
@@ -67,6 +77,15 @@ class EventController extends Controller
         $path = $image->store('event_images', 'public');
         $event->images()->create(['image_path' => $path]);
       }
+    }
+
+    // Create tickets for each type
+    foreach (['normal', 'early_birds', 'premium'] as $type) {
+      $event->tickets()->create([
+        'type' => $type,
+        'price' => $ticketTypes[$type]['price'],
+        'quantity' => $ticketTypes[$type]['quantity'],
+      ]);
     }
 
     return redirect()
@@ -123,11 +142,20 @@ class EventController extends Controller
       'venue' => 'required|string|max:255',
       'city_id' => 'required|exists:cities,id',
       'capacity' => 'required|integer|min:1',
-      'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
       'images' => 'nullable|array',
       'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
       'category_id' => 'required|exists:categories,id',
+      'ticket_types' => 'required|array',
+      'ticket_types.normal.price' => 'required|numeric|min:0',
+      'ticket_types.normal.quantity' => 'required|integer|min:0',
+      'ticket_types.early_birds.price' => 'required|numeric|min:0',
+      'ticket_types.early_birds.quantity' => 'required|integer|min:0',
+      'ticket_types.premium.price' => 'required|numeric|min:0',
+      'ticket_types.premium.quantity' => 'required|integer|min:0',
     ]);
+
+    $ticketTypes = $validated['ticket_types'];
+    unset($validated['ticket_types']);
 
     $event->update($validated);
 
@@ -136,6 +164,17 @@ class EventController extends Controller
         $path = $image->store('event_images', 'public');
         $event->images()->create(['image_path' => $path]);
       }
+    }
+
+    // Update or create tickets for each type
+    foreach (['normal', 'early_birds', 'premium'] as $type) {
+      $event->tickets()->updateOrCreate(
+        ['type' => $type],
+        [
+          'price' => $ticketTypes[$type]['price'],
+          'quantity' => $ticketTypes[$type]['quantity'],
+        ]
+      );
     }
 
     return redirect()

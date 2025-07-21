@@ -113,6 +113,14 @@ class Event extends Model
     }
 
     /**
+     * Get the tickets for the event.
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
+    /**
      * Get the total number of tickets sold with caching.
      */
     public function getTicketsSoldAttribute(): int

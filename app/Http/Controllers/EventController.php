@@ -46,6 +46,9 @@ class EventController extends Controller
     $cities = Event::getAvailableCities();
     $categories = \App\Models\Category::all();
 
+    // Load tickets for each event
+    $events->load('tickets');
+
     return view('events.index', compact('events', 'cities', 'categories'));
   }
 
@@ -60,7 +63,7 @@ class EventController extends Controller
     }
 
     // Eager load related data to prevent N+1 queries
-    $event->load(['organizer', 'category', 'bookings.user']);
+    $event->load(['organizer', 'category', 'bookings.user', 'tickets']);
 
     return view('events.show', compact('event'));
   }

@@ -39,6 +39,21 @@
             <p>{{ $event->description }}</p>
           </div>
 
+          <!-- Ticket Types & Prices -->
+          <div class="mb-4">
+            <h4 class="font-bold">Ticket Types & Prices</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              @foreach(['normal' => 'Normal', 'early_birds' => 'Early Birds', 'premium' => 'Premium'] as $type => $label)
+              @php $ticket = $event->tickets->where('type', $type)->first(); @endphp
+              <div class="bg-gray-100 dark:bg-gray-900 rounded-lg p-4">
+                <div class="font-semibold mb-1">{{ $label }}</div>
+                <div>Price: <span class="font-bold">${{ $ticket ? number_format($ticket->price, 2) : '0.00' }}</span></div>
+                <div>Quantity: <span class="font-bold">{{ $ticket ? $ticket->quantity : 0 }}</span></div>
+              </div>
+              @endforeach
+            </div>
+          </div>
+
           <div class="flex justify-between items-center mt-4">
             <a href="{{ route('organizer.my-events') }}" class="text-blue-500 hover:underline">← Back to My Events</a>
             <div>

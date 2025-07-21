@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -13,6 +14,7 @@ class Booking extends Model
   protected $fillable = [
     'user_id',
     'event_id',
+    'ticket_id',
     'quantity',
     'total_amount',
     'status',
@@ -44,19 +46,27 @@ class Booking extends Model
   }
 
   /**
+   * Get the ticket for this booking.
+   */
+  public function ticket(): BelongsTo
+  {
+    return $this->belongsTo(Ticket::class);
+  }
+
+  /**
+   * Get the payment for this booking.
+   */
+  public function payment(): HasOne
+  {
+    return $this->hasOne(Payment::class, 'booking_id');
+  }
+
+  /**
    * Check if the booking is confirmed.
    */
   public function isConfirmed(): bool
   {
     return $this->status === 'confirmed';
-  }
-
-  /**
-   * Check if the booking is paid.
-   */
-  public function isPaid(): bool
-  {
-    return $this->payment_status === 'paid';
   }
 
   /**

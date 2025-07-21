@@ -122,12 +122,30 @@
                                             <x-text-input id="capacity" class="block mt-1 w-full" type="number" name="capacity" :value="old('capacity')" required min="1" />
                                             <div class="text-red-500 text-sm mt-1 hidden" id="capacity-error"></div>
                                         </div>
+                                    </div>
 
-                                        <!-- Ticket Price -->
-                                        <div>
-                                            <x-input-label for="ticket_price" :value="__('Price ($)')" />
-                                            <x-text-input id="ticket_price" class="block mt-1 w-full" type="number" name="ticket_price" :value="old('ticket_price', 0)" required min="0" step="0.01" />
-                                            <div class="text-red-500 text-sm mt-1 hidden" id="ticket_price-error"></div>
+                                    <!-- Ticket Types & Prices -->
+                                    <div class="mt-6">
+                                        <h4 class="font-semibold mb-2">Ticket Types & Prices</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <x-input-label for="ticket_types[normal][price]" :value="__('Normal Price ($)')" />
+                                                <x-text-input id="ticket_types_normal_price" class="block mt-1 w-full" type="number" name="ticket_types[normal][price]" :value="old('ticket_types.normal.price', 0)" min="0" step="0.01" required />
+                                                <x-input-label for="ticket_types[normal][quantity]" :value="__('Normal Quantity')" class="mt-2" />
+                                                <x-text-input id="ticket_types_normal_quantity" class="block mt-1 w-full" type="number" name="ticket_types[normal][quantity]" :value="old('ticket_types.normal.quantity', 0)" min="0" required />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="ticket_types[early_birds][price]" :value="__('Early Birds Price ($)')" />
+                                                <x-text-input id="ticket_types_early_birds_price" class="block mt-1 w-full" type="number" name="ticket_types[early_birds][price]" :value="old('ticket_types.early_birds.price', 0)" min="0" step="0.01" required />
+                                                <x-input-label for="ticket_types[early_birds][quantity]" :value="__('Early Birds Quantity')" class="mt-2" />
+                                                <x-text-input id="ticket_types_early_birds_quantity" class="block mt-1 w-full" type="number" name="ticket_types[early_birds][quantity]" :value="old('ticket_types.early_birds.quantity', 0)" min="0" required />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="ticket_types[premium][price]" :value="__('Premium Price ($)')" />
+                                                <x-text-input id="ticket_types_premium_price" class="block mt-1 w-full" type="number" name="ticket_types[premium][price]" :value="old('ticket_types.premium.price', 0)" min="0" step="0.01" required />
+                                                <x-input-label for="ticket_types[premium][quantity]" :value="__('Premium Quantity')" class="mt-2" />
+                                                <x-text-input id="ticket_types_premium_quantity" class="block mt-1 w-full" type="number" name="ticket_types[premium][quantity]" :value="old('ticket_types.premium.quantity', 0)" min="0" required />
+                                            </div>
                                         </div>
                                     </div>
 

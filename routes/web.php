@@ -91,6 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
         Route::delete('/bookings/{booking}', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::get('/events/{event}/bookings/payment', [\App\Http\Controllers\User\BookingController::class, 'payment'])->name('bookings.payment');
+        Route::post('/events/{event}/bookings/payment/process', [\App\Http\Controllers\User\BookingController::class, 'processPayment'])->name('bookings.payment.process');
     });
 
     // --- ORGANIZER ROUTES ---

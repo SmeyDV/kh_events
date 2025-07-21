@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class EventController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Event::with(['category', 'organizer:id,name', 'images'])
+        $query = Event::with(['category', 'organizer:id,name', 'images', 'tickets'])
             ->where('status', 'published');
 
         // Filtering by city
@@ -77,18 +78,25 @@ class EventController extends Controller
                 'venue' => 'required|string|max:255',
                 'city_id' => 'required|exists:cities,id',
                 'capacity' => 'required|integer|min:1',
-                'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'category_id' => 'required|exists:categories,id',
+                'ticket_types' => 'required|array',
+                'ticket_types.normal.price' => 'required|numeric|min:0',
+                'ticket_types.normal.quantity' => 'required|integer|min:0',
+                'ticket_types.early_birds.price' => 'required|numeric|min:0',
+                'ticket_types.early_birds.quantity' => 'required|integer|min:0',
+                'ticket_types.premium.price' => 'required|numeric|min:0',
+                'ticket_types.premium.quantity' => 'required|integer|min:0',
             ]);
 
             $validated['organizer_id'] = Auth::id();
             $validated['status'] = 'draft';
 
-            // Remove images from validated data as we'll handle them separately
             $images = $validated['images'] ?? [];
             unset($validated['images']);
+            $ticketTypes = $validated['ticket_types'];
+            unset($validated['ticket_types']);
 
             $event = Event::create($validated);
 
@@ -98,12 +106,21 @@ class EventController extends Controller
                     $imagePath = $image->store('event_images', 'public');
                     $event->images()->create([
                         'image_path' => $imagePath,
-                        'is_primary' => $event->images()->count() === 0 // First image is primary
+                        'is_primary' => $event->images()->count() === 0
                     ]);
                 }
             }
 
-            $event->load(['category', 'organizer:id,name', 'city', 'images']);
+            // Create tickets for each type
+            foreach (['normal', 'early_birds', 'premium'] as $type) {
+                $event->tickets()->create([
+                    'type' => $type,
+                    'price' => $ticketTypes[$type]['price'],
+                    'quantity' => $ticketTypes[$type]['quantity'],
+                ]);
+            }
+
+            $event->load(['category', 'organizer:id,name', 'city', 'images', 'tickets']);
 
             return response()->json([
                 'success' => true,
@@ -124,7 +141,7 @@ class EventController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $event = Event::with(['category', 'organizer:id,name', 'images'])
+        $event = Event::with(['category', 'organizer:id,name', 'images', 'tickets'])
             ->where('status', 'published')
             ->find($id);
 
@@ -186,21 +203,41 @@ class EventController extends Controller
                 'venue' => 'required|string|max:255',
                 'city_id' => 'required|exists:cities,id',
                 'capacity' => 'required|integer|min:1',
-                'ticket_price' => 'nullable|numeric|min:0|max:999999.99',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'category_id' => 'required|exists:categories,id',
+                'ticket_types' => 'required|array',
+                'ticket_types.normal.price' => 'required|numeric|min:0',
+                'ticket_types.normal.quantity' => 'required|integer|min:0',
+                'ticket_types.early_birds.price' => 'required|numeric|min:0',
+                'ticket_types.early_birds.quantity' => 'required|integer|min:0',
+                'ticket_types.premium.price' => 'required|numeric|min:0',
+                'ticket_types.premium.quantity' => 'required|integer|min:0',
             ]);
 
             if ($request->hasFile('image')) {
-                // Delete old image if exists
                 if ($event->image_path) {
                     Storage::disk('public')->delete($event->image_path);
                 }
                 $validated['image_path'] = $request->file('image')->store('event_images', 'public');
             }
 
+            $ticketTypes = $validated['ticket_types'];
+            unset($validated['ticket_types']);
+
             $event->update($validated);
-            $event->load(['category', 'organizer:id,name']);
+
+            // Update or create tickets for each type
+            foreach (['normal', 'early_birds', 'premium'] as $type) {
+                $event->tickets()->updateOrCreate(
+                    ['type' => $type],
+                    [
+                        'price' => $ticketTypes[$type]['price'],
+                        'quantity' => $ticketTypes[$type]['quantity'],
+                    ]
+                );
+            }
+
+            $event->load(['category', 'organizer:id,name', 'tickets']);
 
             return response()->json([
                 'success' => true,
@@ -300,7 +337,7 @@ class EventController extends Controller
      */
     public function byCategory(string $categoryId): JsonResponse
     {
-        $events = Event::with(['category', 'organizer:id,name', 'images'])
+        $events = Event::with(['category', 'organizer:id,name', 'images', 'tickets'])
             ->where('category_id', $categoryId)
             ->where('status', 'published')
             ->latest()
@@ -317,7 +354,7 @@ class EventController extends Controller
      */
     public function byCity(string $cityId): JsonResponse
     {
-        $events = Event::with(['category', 'organizer:id,name', 'images'])
+        $events = Event::with(['category', 'organizer:id,name', 'images', 'tickets'])
             ->where('city_id', $cityId)
             ->where('status', 'published')
             ->latest()
@@ -340,7 +377,7 @@ class EventController extends Controller
             return $this->index($request); // Return paginated results if no query
         }
 
-        $events = Event::with(['category', 'organizer:id,name', 'images'])
+        $events = Event::with(['category', 'organizer:id,name', 'images', 'tickets'])
             ->where('status', 'published')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")

@@ -75,11 +75,21 @@
                 @csrf
 
                 <div>
+                  <x-input-label for="ticket_type" :value="__('Ticket Type')" />
+                  <select id="ticket_type" name="ticket_type" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                    @foreach($event->tickets as $ticket)
+                    <option value="{{ $ticket->id }}" data-price="{{ $ticket->price }}" data-available="{{ $ticket->quantity }}">
+                      {{ ucfirst(str_replace('_', ' ', $ticket->type)) }} - ${{ number_format($ticket->price, 2) }} ({{ $ticket->quantity }} available)
+                    </option>
+                    @endforeach
+                  </select>
+                  <x-input-error :messages="$errors->get('ticket_type')" class="mt-2" />
+                </div>
+
+                <div>
                   <x-input-label for="quantity" :value="__('Number of Tickets')" />
                   <select id="quantity" name="quantity" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                    @for ($i = 1; $i <= min(10, $event->capacity ?? 10); $i++)
-                      <option value="{{ $i }}">{{ $i }} {{ Str::plural('ticket', $i) }}</option>
-                      @endfor
+                    <!-- Options will be populated by JS -->
                   </select>
                   <x-input-error :messages="$errors->get('quantity')" class="mt-2" />
                 </div>
@@ -87,28 +97,20 @@
                 <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                   <div class="flex justify-between items-center mb-2">
                     <span class="text-gray-600 dark:text-gray-400">Price per ticket:</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      @if ($event->ticket_price)
-                      ${{ number_format($event->ticket_price, 2) }}
-                      @else
-                      Free
-                      @endif
-                    </span>
+                    <span class="font-medium text-gray-900 dark:text-white" id="price-per-ticket-display"></span>
                   </div>
                   <div class="flex justify-between items-center mb-2">
                     <span class="text-gray-600 dark:text-gray-400">Quantity:</span>
                     <span class="font-medium text-gray-900 dark:text-white" id="quantity-display">1</span>
                   </div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600 dark:text-gray-400">Available:</span>
+                    <span class="font-medium text-gray-900 dark:text-white" id="available-display"></span>
+                  </div>
                   <hr class="my-2 border-gray-300 dark:border-gray-600">
                   <div class="flex justify-between items-center">
                     <span class="text-lg font-semibold text-gray-900 dark:text-white">Total:</span>
-                    <span class="text-lg font-bold text-red-600 dark:text-red-400" id="total-amount">
-                      @if ($event->ticket_price)
-                      ${{ number_format($event->ticket_price, 2) }}
-                      @else
-                      Free
-                      @endif
-                    </span>
+                    <span class="text-lg font-bold text-red-600 dark:text-red-400" id="total-amount"></span>
                   </div>
                 </div>
 
@@ -129,24 +131,47 @@
   </div>
 
   <script>
-    // Update total amount when quantity changes
     document.addEventListener('DOMContentLoaded', function() {
+      const ticketTypeSelect = document.getElementById('ticket_type');
       const quantitySelect = document.getElementById('quantity');
-      const pricePerTicket = {
-        !!$event - > ticket_price ?? 0!!
-      };
+      const priceDisplay = document.getElementById('price-per-ticket-display');
+      const availableDisplay = document.getElementById('available-display');
+      const quantityDisplay = document.getElementById('quantity-display');
+      const totalAmountDisplay = document.getElementById('total-amount');
 
-      function updateTotal() {
-        const quantity = parseInt(quantitySelect.value);
-        const total = quantity * pricePerTicket;
+      function updateForm() {
+        const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+        const price = parseFloat(selectedOption.getAttribute('data-price'));
+        const available = parseInt(selectedOption.getAttribute('data-available'));
+        priceDisplay.textContent = price > 0 ? '$' + price.toFixed(2) : 'Free';
+        availableDisplay.textContent = available;
 
-        document.getElementById('quantity-display').textContent = quantity;
-        document.getElementById('total-amount').textContent = total > 0 ? '$' + total.toFixed(2) : 'Free';
+        // Update quantity options
+        quantitySelect.innerHTML = '';
+        for (let i = 1; i <= Math.min(10, available); i++) {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = i + ' ' + (i === 1 ? 'ticket' : 'tickets');
+          quantitySelect.appendChild(opt);
+        }
+        quantityDisplay.textContent = quantitySelect.value;
+        updateTotal();
       }
 
+      function updateTotal() {
+        const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+        const price = parseFloat(selectedOption.getAttribute('data-price'));
+        const quantity = parseInt(quantitySelect.value);
+        quantityDisplay.textContent = quantity;
+        let total = price * quantity;
+        totalAmountDisplay.textContent = total > 0 ? '$' + total.toFixed(2) : 'Free';
+      }
+
+      ticketTypeSelect.addEventListener('change', updateForm);
       quantitySelect.addEventListener('change', updateTotal);
-      // Set initial total
-      updateTotal();
+
+      // Initialize on page load
+      updateForm();
     });
   </script>
 </x-main-layout>

@@ -43,10 +43,23 @@
           <div>
             <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Tickets</h2>
             <div class="text-gray-700 dark:text-gray-300 space-y-2">
-              <p><span class="font-semibold">Price:</span> {{ $event->ticket_price > 0 ? '$' . number_format($event->ticket_price, 2) : 'Free' }}</p>
               <p><span class="font-semibold">Capacity:</span> {{ $event->capacity ?? 'Not specified' }}</p>
               <p><span class="font-semibold">Tickets Left:</span> {{ $event->getRemainingTicketsAttribute() ?? 'N/A' }}</p>
             </div>
+
+            @if($event->tickets->isNotEmpty())
+            <div class="mt-2">
+              <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">Ticket Types:</h3>
+              <div class="space-y-1">
+                @foreach($event->tickets as $ticket)
+                <div class="flex justify-between items-center text-sm">
+                  <span class="capitalize text-gray-800 dark:text-white">{{ str_replace('_', ' ', $ticket->type) }}</span>
+                  <span class="font-semibold text-gray-800 dark:text-white">${{ number_format($ticket->price, 2) }}</span>
+                </div>
+                @endforeach
+              </div>
+            </div>
+            @endif
           </div>
         </div>
 

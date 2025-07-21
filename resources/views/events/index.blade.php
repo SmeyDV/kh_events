@@ -227,11 +227,14 @@
                 <p class="text-gray-600 dark:text-gray-400 mb-2">${formatDate(event.start_date)}</p>
                 <p class="text-gray-500 dark:text-gray-400 mb-2">${event.city?.name || 'N/A'}</p>
                 <p class="text-gray-700 dark:text-gray-200">${truncateText(event.description, 100)}</p>
-                <div class="mt-4 flex justify-between items-center">
-                  <span class="font-bold text-lg">${event.ticket_price > 0 ? '$' + parseFloat(event.ticket_price).toFixed(2) : 'Free'}</span>
-                  <a href="/events/${event.id}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    View Details
-                  </a>
+                <div class="mt-4">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-lg">From $${event.tickets && event.tickets.length > 0 ? 
+                      Math.min(...event.tickets.map(t => parseFloat(t.price))).toFixed(2) : '0.00'}</span>
+                    <a href="/events/${event.id}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                      View Details
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
