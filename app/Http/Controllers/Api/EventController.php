@@ -103,7 +103,7 @@ class EventController extends Controller
             // Handle multiple image uploads
             if (!empty($images)) {
                 foreach ($images as $image) {
-                    $imagePath = $image->store('event_images', 'public');
+                    $imagePath = $image->store('event_images', 's3');
                     $event->images()->create([
                         'image_path' => $imagePath,
                         'is_primary' => $event->images()->count() === 0
@@ -216,9 +216,9 @@ class EventController extends Controller
 
             if ($request->hasFile('image')) {
                 if ($event->image_path) {
-                    Storage::disk('public')->delete($event->image_path);
+                    Storage::disk('s3')->delete($event->image_path);
                 }
-                $validated['image_path'] = $request->file('image')->store('event_images', 'public');
+                $validated['image_path'] = $request->file('image')->store('event_images', 's3');
             }
 
             $ticketTypes = $validated['ticket_types'];
@@ -278,7 +278,7 @@ class EventController extends Controller
         // Delete associated images from storage
         if ($event->images) {
             foreach ($event->images as $image) {
-                Storage::disk('public')->delete($image->image_path);
+                Storage::disk('s3')->delete($image->image_path);
             }
             // Images will be deleted from db by cascade
         }
@@ -312,16 +312,16 @@ class EventController extends Controller
 
             // Delete old image if exists
             if ($event->image_path) {
-                Storage::disk('public')->delete($event->image_path);
+                Storage::disk('s3')->delete($event->image_path);
             }
 
-            $imagePath = $request->file('image')->store('event_images', 'public');
+            $imagePath = $request->file('image')->store('event_images', 's3');
             $event->update(['image_path' => $imagePath]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Image uploaded successfully',
-                'image_url' => Storage::url($imagePath)
+                'image_url' => Storage::disk('s3')->url($imagePath)
             ]);
         } catch (ValidationException $e) {
             return response()->json([
